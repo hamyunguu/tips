@@ -385,7 +385,7 @@
     .bdo-preview {
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
-      padding: 40px 24px 20px;
+      padding: 55px 24px 20px;
       flex-shrink: 0;
     }
     .bdo-book-scene {
@@ -1383,6 +1383,41 @@ spineEl.addEventListener('mouseleave', () => {
     { title:'Soft Proof',        color:'#9E9080', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'랑데뷰 화이트',      weight:'90g/m²',  finish:'무코팅',   binding:'무선제본' },
     { title:'Monograph 04',      color:'#607080', aspect:[190,270], size:'190 × 270mm',          paper:'먼켄 내추럴',        weight:'100g/m²', finish:'무코팅',   binding:'양장제본' },
     { title:'Hand Press',        color:'#887868', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 내추럴',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Woodblock I',       color:'#8C7858', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'랑데뷰 내추럴',      weight:'100g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Type Specimen',     color:'#6E8090', aspect:[210,297], size:'A4 · 210 × 297mm',    paper:'몬디알 화이트',      weight:'100g/m²', finish:'매트코팅', binding:'무선제본' },
+    { title:'Intaglio',          color:'#A09878', aspect:[148,148], size:'정방형 · 148 × 148mm', paper:'오프셋 크림',        weight:'90g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Proof No.7',        color:'#788898', aspect:[128,182], size:'B5 · 128 × 182mm',    paper:'랑데뷰 그레이',      weight:'120g/m²', finish:'무광코팅', binding:'실 제본'  },
+    { title:'Letterform',        color:'#C4B09C', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 내추럴',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Margin Notes',      color:'#5C7068', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'먼켄 퓨어',          weight:'100g/m²', finish:'무코팅',   binding:'양장제본' },
+    { title:'Screen Print 01',   color:'#9890A0', aspect:[210,297], size:'A4 · 210 × 297mm',    paper:'몬디알 화이트',      weight:'120g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Blind Emboss',      color:'#B8AC9C', aspect:[170,240], size:'170 × 240mm',          paper:'랑데뷰 오프화이트',  weight:'140g/m²', finish:'무광코팅', binding:'양장제본' },
+    { title:'Zine Vol.4',        color:'#788070', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'오프셋 내추럴',      weight:'70g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Colophon',          color:'#6878A0', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'랑데뷰 화이트',      weight:'100g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Relief Print',      color:'#A08870', aspect:[190,270], size:'190 × 270mm',          paper:'먼켄 내추럴',        weight:'115g/m²', finish:'무코팅',   binding:'양장제본' },
+    { title:'Folio I',           color:'#708098', aspect:[210,148], size:'가로형 · 210 × 148mm', paper:'랑데뷰 내추럴',      weight:'100g/m²', finish:'무코팅',   binding:'중철제본' },
+    { title:'Studio Notes',      color:'#C8C0AE', aspect:[128,182], size:'B5 · 128 × 182mm',    paper:'오프셋 크림',        weight:'90g/m²',  finish:'무코팅',   binding:'무선제본' },
+    { title:'Halftone',          color:'#5E7080', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'몬디알 화이트',      weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Unbound',           color:'#987888', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 브라운',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Register Mark',     color:'#A8B098', aspect:[148,148], size:'정방형 · 148 × 148mm', paper:'랑데뷰 그린',        weight:'90g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Edition 08',        color:'#706870', aspect:[170,240], size:'170 × 240mm',          paper:'랑데뷰 오프화이트',  weight:'120g/m²', finish:'무광코팅', binding:'실 제본'  },
+    { title:'Lithograph II',     color:'#BEB0A0', aspect:[210,297], size:'A4 · 210 × 297mm',    paper:'몬디알 아이보리',    weight:'100g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Presswork',         color:'#688078', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'먼켄 퓨어',          weight:'115g/m²', finish:'무코팅',   binding:'양장제본' },
+    { title:'Bleed No.2',        color:'#8090A8', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'오프셋 내추럴',      weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Cyan Study',        color:'#6A8898', aspect:[128,182], size:'B5 · 128 × 182mm',    paper:'랑데뷰 블루',        weight:'120g/m²', finish:'무광코팅', binding:'실 제본'  },
+    { title:'Paper Type 03',     color:'#C0A888', aspect:[190,270], size:'190 × 270mm',          paper:'크라프트 내추럴',    weight:'100g/m²', finish:'무코팅',   binding:'양장제본' },
+    { title:'Mono Print',        color:'#787080', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'랑데뷰 그레이',      weight:'90g/m²',  finish:'무코팅',   binding:'무선제본' },
+    { title:'Offset Folio',      color:'#506070', aspect:[210,210], size:'정방형 · 210 × 210mm', paper:'몬디알 화이트',      weight:'120g/m²', finish:'매트코팅', binding:'양장제본' },
+    { title:'Stochastic',        color:'#A89070', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 브라운',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Duotone',           color:'#8898A8', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'오프셋 크림',        weight:'100g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Impression',        color:'#B0A898', aspect:[170,240], size:'170 × 240mm',          paper:'랑데뷰 오프화이트',  weight:'120g/m²', finish:'무광코팅', binding:'실 제본'  },
+    { title:'Stone Print',       color:'#707888', aspect:[148,148], size:'정방형 · 148 × 148mm', paper:'랑데뷰 그린',        weight:'90g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Archive I',         color:'#C8BC98', aspect:[210,297], size:'A4 · 210 × 297mm',    paper:'먼켄 내추럴',        weight:'100g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Vellum Study',      color:'#6080A0', aspect:[128,182], size:'B5 · 128 × 182mm',    paper:'랑데뷰 화이트',      weight:'140g/m²', finish:'무광코팅', binding:'양장제본' },
+    { title:'Flock No.1',        color:'#988070', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 내추럴',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Copperplate',       color:'#5A7080', aspect:[190,270], size:'190 × 270mm',          paper:'몬디알 아이보리',    weight:'120g/m²', finish:'무코팅',   binding:'양장제본' },
+    { title:'Aquatint',          color:'#A8B8A0', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'랑데뷰 내추럴',      weight:'100g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Transfer',          color:'#907868', aspect:[210,148], size:'가로형 · 210 × 148mm', paper:'오프셋 내추럴',      weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Specimen II',       color:'#788890', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'먼켄 퓨어',          weight:'115g/m²', finish:'무코팅',   binding:'무선제본' },
   ];
 
   /* ── DOM refs ── */
