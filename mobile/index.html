@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIPS — Program</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --font: 'Noto Sans KR', sans-serif;
+      --cream: #F5F5F5; --brown: #1A1A1A; --brown-mid: #555;
+      --accent: #444; --accent-lt: #999; --muted: #888;
+      --border: rgba(0,0,0,.12);
+    }
+    html, body { background: var(--cream); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+
+    /* ── TOP BAR ── */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px; background: var(--cream); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px;
+    }
+    .top-logo img { height: 52px; width: auto; display: block; mix-blend-mode: multiply; }
+    .top-label {
+      margin-left: auto; font-size: 9px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--accent);
+    }
+
+    /* ── MAIN ── */
+    .main { padding-top: 56px; padding-bottom: 68px; }
+
+    /* ── HERO ── */
+    .hero { position: relative; width: 100%; height: 54vw; min-height: 200px; max-height: 300px; overflow: hidden; }
+    .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .9s; }
+    .slide.active { opacity: 1; }
+    .slide-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .slide-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.28) 55%, transparent 100%);
+      display: flex; flex-direction: column; justify-content: flex-end; padding: 20px;
+    }
+    .slide-tag { font-size: 9px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 6px; font-weight: 500; }
+    .slide-title { font-size: 21px; font-weight: 700; color: #F5F5F5; line-height: 1.3; margin-bottom: 5px; }
+    .slide-desc { font-size: 11px; color: rgba(245,245,245,.62); font-weight: 300; }
+    .slider-dots { position: absolute; bottom: 14px; right: 18px; display: flex; gap: 6px; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(245,245,245,.35); transition: all .3s; }
+    .dot.active { width: 18px; border-radius: 3px; background: var(--accent-lt); }
+
+    /* ── PROGRAM CARDS ── */
+    .programs { padding: 24px 20px; }
+    .sec-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+    .sec-title { font-size: 14px; font-weight: 700; color: var(--brown); white-space: nowrap; }
+    .sec-rule { flex: 1; height: 1px; background: linear-gradient(to right, rgba(0,0,0,.2), transparent); }
+    .sec-date { font-size: 9px; letter-spacing: 2px; color: var(--muted); font-weight: 300; }
+
+    .cards { display: flex; flex-direction: column; gap: 10px; }
+    .card {
+      background: #fff; display: flex; cursor: pointer;
+      box-shadow: 0 2px 10px rgba(0,0,0,.08);
+      transition: box-shadow .2s;
+    }
+    .card:active { box-shadow: 0 4px 20px rgba(0,0,0,.15); }
+    .card-img { width: 108px; flex-shrink: 0; position: relative; min-height: 90px; }
+    .card-img-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .card-badge {
+      position: absolute; top: 7px; left: 7px;
+      background: var(--brown); color: var(--accent-lt);
+      font-size: 7.5px; letter-spacing: 1px; padding: 2px 7px; font-weight: 500;
+    }
+    .card-badge.sold { background: rgba(0,0,0,.45); color: rgba(245,245,245,.6); }
+    .card-body { padding: 13px 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    .card-title { font-size: 13px; font-weight: 700; color: var(--brown); line-height: 1.45; }
+    .card-foot { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; }
+    .card-date { font-size: 9.5px; color: var(--muted); font-weight: 300; }
+    .card-price { font-size: 13px; font-weight: 700; color: var(--accent); }
+
+    /* ── DETAIL VIEW (full-screen overlay) ── */
+    .detail-view {
+      position: fixed; inset: 0; z-index: 50;
+      background: var(--cream); overflow-y: auto;
+      transform: translateX(100%);
+      padding-bottom: 80px;
+    }
+    .detail-view.open { transform: translateX(0); }
+
+    .detail-top-bar {
+      position: sticky; top: 0; z-index: 2; background: var(--cream);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 12px; padding: 0 20px; height: 48px;
+    }
+    .detail-back { font-size: 20px; color: var(--brown); cursor: pointer; line-height: 1; }
+    .detail-top-title { font-size: 11px; font-weight: 700; letter-spacing: 1px; color: var(--brown); }
+
+    .detail-hero { width: 100%; height: 54vw; min-height: 180px; max-height: 260px; background-size: cover; background-position: center; }
+
+    .detail-body { padding: 20px 20px 0; }
+    .detail-badge { display: inline-block; background: var(--brown); color: var(--accent-lt); font-size: 8.5px; letter-spacing: 1.5px; padding: 3px 10px; font-weight: 500; margin-bottom: 10px; }
+    .detail-badge.sold { background: rgba(0,0,0,.25); color: rgba(0,0,0,.4); }
+    .detail-title { font-size: 20px; font-weight: 700; color: var(--brown); line-height: 1.35; margin-bottom: 14px; }
+    .detail-meta { display: flex; justify-content: space-between; align-items: center; padding-bottom: 16px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
+    .detail-date { font-size: 11px; color: var(--muted); }
+    .detail-price { font-size: 17px; font-weight: 700; color: var(--brown); }
+    .detail-desc { font-size: 12.5px; font-weight: 300; color: var(--brown-mid); line-height: 1.85; margin-bottom: 20px; }
+    .detail-inc-title { font-size: 8.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); margin-bottom: 8px; }
+    .detail-inc { list-style: none; margin-bottom: 20px; }
+    .detail-inc li { font-size: 12px; font-weight: 300; color: var(--brown-mid); padding: 7px 0; border-bottom: 1px solid rgba(0,0,0,.05); display: flex; align-items: center; gap: 8px; }
+    .detail-inc li::before { content: '—'; color: var(--accent-lt); }
+    .detail-level { display: inline-block; font-size: 8.5px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); padding: 4px 10px; border: 1px solid var(--border); margin-bottom: 0; }
+
+    /* ── BOOKING (dark, below detail) ── */
+    .booking-wrap { background: #111; padding: 28px 20px 0; }
+    .booking-head-label { font-size: 8px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase; color: rgba(255,255,255,.22); margin-bottom: 6px; }
+    .booking-prog-name { font-size: 14px; font-weight: 700; color: rgba(255,255,255,.8); margin-bottom: 26px; line-height: 1.4; }
+    .b-sec { margin-bottom: 26px; }
+    .b-sec-title { font-size: 8.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.28); margin-bottom: 13px; }
+
+    .cal-nav { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .cal-month { font-size: 12px; font-weight: 500; color: rgba(255,255,255,.65); }
+    .cal-nav-btn { background: none; border: none; cursor: pointer; color: rgba(255,255,255,.35); font-size: 20px; line-height: 1; padding: 2px 8px; }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+    .cal-dlabel { text-align: center; font-size: 8.5px; font-weight: 600; color: rgba(255,255,255,.2); padding: 4px 0 8px; }
+    .cal-cell { aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 300; color: rgba(255,255,255,.17); border-radius: 50%; }
+    .cal-cell.available { color: rgba(255,255,255,.72); cursor: pointer; border: 1px solid rgba(255,255,255,.14); }
+    .cal-cell.selected { background: rgba(255,255,255,.9); color: #111; font-weight: 700; border-color: transparent; }
+
+    .time-slots { display: flex; gap: 8px; flex-wrap: wrap; }
+    .time-slot { padding: 9px 24px; font-size: 12px; color: rgba(255,255,255,.45); border: 1px solid rgba(255,255,255,.12); background: none; cursor: pointer; font-family: var(--font); transition: all .15s; }
+    .time-slot.selected { background: rgba(255,255,255,.9); color: #111; border-color: transparent; font-weight: 700; }
+
+    .qty-row { display: flex; align-items: center; gap: 16px; }
+    .qty-btn { width: 34px; height: 34px; border: 1px solid rgba(255,255,255,.14); background: none; color: rgba(255,255,255,.55); cursor: pointer; font-size: 20px; display: flex; align-items: center; justify-content: center; }
+    .qty-val { font-size: 18px; font-weight: 500; color: rgba(255,255,255,.82); min-width: 26px; text-align: center; }
+    .qty-note { font-size: 10px; color: rgba(255,255,255,.25); }
+
+    .b-input { width: 100%; background: none; border: none; border-bottom: 1px solid rgba(255,255,255,.1); padding: 11px 0; font-family: var(--font); font-size: 13px; font-weight: 300; color: rgba(255,255,255,.8); outline: none; margin-bottom: 14px; }
+    .b-input::placeholder { color: rgba(255,255,255,.2); }
+    .b-input:focus { border-color: rgba(255,255,255,.4); }
+
+    .booking-footer { background: #0c0c0c; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; }
+    .b-total-label { font-size: 8.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.28); margin-bottom: 4px; }
+    .b-total-price { font-size: 20px; font-weight: 700; color: rgba(255,255,255,.88); }
+    .b-submit { padding: 14px 28px; background: rgba(255,255,255,.9); border: none; cursor: pointer; font-family: var(--font); font-size: 11px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: #111; }
+
+    /* ── BOTTOM NAV ── */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      height: 58px; background: #1A1A1A; border-top: 1px solid rgba(255,255,255,.06);
+      display: flex;
+    }
+    .bottom-nav a {
+      flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
+      text-decoration: none; font-family: var(--font); font-size: 9px; font-weight: 500;
+      letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.32); transition: color .2s;
+    }
+    .bottom-nav a.active { color: rgba(255,255,255,.85); }
+    .nav-pip { width: 4px; height: 4px; border-radius: 50%; background: transparent; transition: background .2s; }
+    .bottom-nav a.active .nav-pip { background: rgba(255,255,255,.7); }
+
+    /* ── OVERLAY ── */
+    #ov { position: fixed; inset: 0; z-index: 200; background: #0c0c0c; opacity: 0; pointer-events: none; }
+  </style>
+</head>
+<body>
+
+<div id="ov"></div>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <div class="top-logo"><img src="../LOGO.png" alt="TIPS" class="logo-img"></div>
+  <div class="top-label">Program</div>
+</div>
+
+<!-- Main -->
+<div class="main">
+  <!-- Hero -->
+  <div class="hero" id="hero">
+    <div class="slide active">
+      <div class="slide-bg" style="background-image:url('../first program banner.png');"></div>
+      <div class="slide-overlay">
+        <div class="slide-tag">Exhibition · 2026</div>
+        <div class="slide-title">활판의 미학,<br>손으로 찍는 기억</div>
+        <div class="slide-desc">전통 활판 인쇄 기법으로 만드는 나만의 인쇄물</div>
+      </div>
+    </div>
+    <div class="slide">
+      <div class="slide-bg" style="background-image:url('../second program banner.png');"></div>
+      <div class="slide-overlay">
+        <div class="slide-tag">Workshop · 2026</div>
+        <div class="slide-title">리소그래프<br>인쇄 워크숍</div>
+        <div class="slide-desc">두 가지 색상으로 표현하는 개성 있는 인쇄 예술</div>
+      </div>
+    </div>
+    <div class="slide">
+      <div class="slide-bg" style="background-image:url('../third program banner.png');"></div>
+      <div class="slide-overlay">
+        <div class="slide-tag">Masterclass · 2026</div>
+        <div class="slide-title">Book Binding<br>제본 마스터클래스</div>
+        <div class="slide-desc">손으로 엮는 나만의 책, 일본식 실 제본 심화 과정</div>
+      </div>
+    </div>
+    <div class="slider-dots">
+      <div class="dot active" data-i="0"></div>
+      <div class="dot" data-i="1"></div>
+      <div class="dot" data-i="2"></div>
+    </div>
+  </div>
+
+  <!-- Cards -->
+  <section class="programs">
+    <div class="sec-header">
+      <h2 class="sec-title">진행중인 프로그램</h2>
+      <div class="sec-rule"></div>
+      <span class="sec-date">2026. 11</span>
+    </div>
+    <div class="cards">
+      <article class="card">
+        <div class="card-img">
+          <div class="card-img-bg" style="background-image:url('../first program card news.png');"></div>
+          <span class="card-badge">OPEN</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">활판 명함 제작 워크숍</div>
+          <div class="card-foot">
+            <span class="card-date">11.15 — 11.16</span>
+            <span class="card-price">₩85,000</span>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-img">
+          <div class="card-img-bg" style="background-image:url('../second program card news.png');"></div>
+          <span class="card-badge sold">마감임박</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">리소 입문 포스터 프린팅</div>
+          <div class="card-foot">
+            <span class="card-date">11.22 — 11.23</span>
+            <span class="card-price">₩120,000</span>
+          </div>
+        </div>
+      </article>
+      <article class="card">
+        <div class="card-img">
+          <div class="card-img-bg" style="background-image:url('../third program card news.png');"></div>
+          <span class="card-badge">모집중</span>
+        </div>
+        <div class="card-body">
+          <div class="card-title">Book Binding 제본 마스터클래스</div>
+          <div class="card-foot">
+            <span class="card-date">12.06 — 12.07</span>
+            <span class="card-price">₩150,000</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+</div>
+
+<!-- Detail + Booking overlay -->
+<div class="detail-view" id="detailView">
+  <div class="detail-top-bar">
+    <span class="detail-back" id="detailBack">←</span>
+    <span class="detail-top-title">프로그램 상세</span>
+  </div>
+  <div class="detail-hero" id="detailImg"></div>
+  <div class="detail-body">
+    <div class="detail-badge" id="detailBadge"></div>
+    <h2 class="detail-title" id="detailTitle"></h2>
+    <div class="detail-meta">
+      <span class="detail-date" id="detailDate"></span>
+      <span class="detail-price" id="detailPrice"></span>
+    </div>
+    <p class="detail-desc" id="detailDesc"></p>
+    <div class="detail-inc-title">포함 내역</div>
+    <ul class="detail-inc" id="detailInc"></ul>
+    <div class="detail-level" id="detailLevel"></div>
+  </div>
+
+  <div class="booking-wrap">
+    <div class="booking-head-label">예약 신청</div>
+    <div class="booking-prog-name" id="bProgName"></div>
+
+    <div class="b-sec">
+      <div class="b-sec-title">날짜 선택</div>
+      <div class="cal-nav">
+        <button class="cal-nav-btn" id="calPrev">‹</button>
+        <div class="cal-month" id="calMonth"></div>
+        <button class="cal-nav-btn" id="calNext">›</button>
+      </div>
+      <div class="cal-grid" id="calGrid">
+        <div class="cal-dlabel">일</div><div class="cal-dlabel">월</div>
+        <div class="cal-dlabel">화</div><div class="cal-dlabel">수</div>
+        <div class="cal-dlabel">목</div><div class="cal-dlabel">금</div>
+        <div class="cal-dlabel">토</div>
+      </div>
+    </div>
+
+    <div class="b-sec">
+      <div class="b-sec-title">시간 선택</div>
+      <div class="time-slots" id="timeSlots"></div>
+    </div>
+
+    <div class="b-sec">
+      <div class="b-sec-title">인원 선택</div>
+      <div class="qty-row">
+        <button class="qty-btn" id="qtyMinus">−</button>
+        <div class="qty-val" id="qtyVal">1</div>
+        <button class="qty-btn" id="qtyPlus">+</button>
+        <span class="qty-note">최대 5명</span>
+      </div>
+    </div>
+
+    <div class="b-sec">
+      <div class="b-sec-title">신청자 정보</div>
+      <input class="b-input" id="bName" type="text" placeholder="이름을 입력하세요">
+      <input class="b-input" id="bPhone" type="tel" placeholder="연락처 (010-0000-0000)">
+    </div>
+  </div>
+
+  <div class="booking-footer">
+    <div>
+      <div class="b-total-label">합계</div>
+      <div class="b-total-price" id="bTotal"></div>
+    </div>
+    <button class="b-submit" id="bSubmit">예약하기</button>
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <a href="about.html"><div class="nav-pip"></div>About</a>
+  <a href="order.html"><div class="nav-pip"></div>Order</a>
+  <a href="index.html" class="active"><div class="nav-pip"></div>Program</a>
+  <a href="#"><div class="nav-pip"></div>Contact</a>
+</nav>
+
+<script>
+(function () {
+  /* ── Hero slider ── */
+  const slides = document.querySelectorAll('.slide');
+  const dots   = document.querySelectorAll('.dot');
+  let si = 0;
+  function goTo(i) {
+    slides[si].classList.remove('active'); dots[si].classList.remove('active');
+    si = (i + slides.length) % slides.length;
+    slides[si].classList.add('active'); dots[si].classList.add('active');
+  }
+  let st = setInterval(() => goTo(si + 1), 4500);
+  dots.forEach((d, i) => d.addEventListener('click', () => { clearInterval(st); goTo(i); st = setInterval(() => goTo(si + 1), 4500); }));
+
+  /* ── Programs data ── */
+  const programs = [
+    { title:'활판 명함 제작 워크숍', badge:'OPEN', sold:false, dates:['2026-11-15','2026-11-16'], times:['10:00','14:00'], price:85000, img:'../first program banner.png', desc:'전통 활판 인쇄 기법으로 나만의 명함을 만드는 워크숍입니다. 직접 활자를 조판하고 프레스로 찍어내는 경험을 통해 인쇄의 본질을 느껴보세요. 소규모 정원으로 충분한 개인 지도를 받을 수 있습니다.', includes:['재료비 포함','명함 30매 제공','점심 및 음료 제공'], level:'입문' },
+    { title:'리소 입문 포스터 프린팅', badge:'마감임박', sold:true, dates:['2026-11-22','2026-11-23'], times:['10:00','14:00'], price:120000, img:'../second program banner.png', desc:'리소그래프의 독특한 질감과 색감을 경험하는 포스터 프린팅 워크숍입니다. 두 가지 색상으로 개성 있는 A3 포스터를 직접 기획하고 제작합니다.', includes:['재료비 포함','A3 포스터 3매 제공','음료 제공'], level:'입문' },
+    { title:'Book Binding 제본 마스터클래스', badge:'모집중', sold:false, dates:['2026-12-06','2026-12-07'], times:['10:00','14:00'], price:150000, img:'../third program banner.png', desc:'일본식 실 제본(Coptic Stitch)을 중심으로 다양한 제본 기술을 배우는 심화 과정입니다. 나만의 노트북 또는 스케치북을 완성해가는 두 번의 집중 수업입니다.', includes:['재료비 포함','완성 제본 책 1권','커피 및 음료 제공'], level:'심화' },
+  ];
+
+  let cur=null, selDate=null, selTime=null, qty=1, calY=2026, calM=10;
+  const ov = document.getElementById('ov');
+  const dv = document.getElementById('detailView');
+  const fmt = n => '₩' + n.toLocaleString('ko-KR');
+
+  function fade(cb) {
+    ov.style.transition = 'opacity 0.18s ease-in';
+    ov.style.opacity = '1'; ov.style.pointerEvents = 'all';
+    setTimeout(() => { cb(); ov.style.transition = 'opacity 0.22s ease-out'; void ov.offsetWidth; ov.style.opacity = '0'; ov.style.pointerEvents = 'none'; }, 200);
+  }
+
+  function renderCal() {
+    const mn = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    document.getElementById('calMonth').textContent = `${calY}년 ${mn[calM]}`;
+    const g = document.getElementById('calGrid');
+    while (g.children.length > 7) g.removeChild(g.lastChild);
+    const fd = new Date(calY, calM, 1).getDay();
+    const days = new Date(calY, calM + 1, 0).getDate();
+    for (let i = 0; i < fd; i++) { const e = document.createElement('div'); e.className = 'cal-cell'; g.appendChild(e); }
+    for (let d = 1; d <= days; d++) {
+      const ds = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const avail = cur && cur.dates.includes(ds);
+      const e = document.createElement('div');
+      e.className = 'cal-cell' + (avail ? ' available' : '') + (ds === selDate ? ' selected' : '');
+      e.textContent = d;
+      if (avail) e.addEventListener('click', () => { selDate = ds; renderCal(); });
+      g.appendChild(e);
+    }
+  }
+
+  function renderTimes() {
+    const el = document.getElementById('timeSlots'); el.innerHTML = '';
+    (cur?.times || []).forEach(t => {
+      const b = document.createElement('button');
+      b.className = 'time-slot' + (t === selTime ? ' selected' : ''); b.textContent = t;
+      b.addEventListener('click', () => { selTime = t; renderTimes(); });
+      el.appendChild(b);
+    });
+  }
+
+  function updateTotal() { if (cur) document.getElementById('bTotal').textContent = fmt(cur.price * qty); }
+
+  function openProg(i) {
+    cur = programs[i]; selDate = null; selTime = null; qty = 1;
+    const fd = new Date(cur.dates[0]); calY = fd.getFullYear(); calM = fd.getMonth();
+    document.getElementById('detailImg').style.backgroundImage = `url('${cur.img}')`;
+    document.getElementById('detailBadge').textContent = cur.badge;
+    document.getElementById('detailBadge').className = 'detail-badge' + (cur.sold ? ' sold' : '');
+    document.getElementById('detailTitle').textContent = cur.title;
+    const [d0, d1] = cur.dates;
+    document.getElementById('detailDate').textContent = `${d0.slice(5).replace('-','.')} — ${d1.slice(5).replace('-','.')}`;
+    document.getElementById('detailPrice').textContent = fmt(cur.price);
+    document.getElementById('detailDesc').textContent = cur.desc;
+    document.getElementById('detailInc').innerHTML = cur.includes.map(s => `<li>${s}</li>`).join('');
+    document.getElementById('detailLevel').textContent = `Level · ${cur.level}`;
+    document.getElementById('bProgName').textContent = cur.title;
+    document.getElementById('qtyVal').textContent = '1';
+    document.getElementById('bName').value = ''; document.getElementById('bPhone').value = '';
+    renderCal(); renderTimes(); updateTotal();
+    fade(() => { dv.classList.add('open'); dv.scrollTop = 0; });
+  }
+
+  document.querySelectorAll('.card').forEach((c, i) => c.addEventListener('click', () => openProg(i)));
+  document.getElementById('detailBack').addEventListener('click', () => fade(() => dv.classList.remove('open')));
+  document.getElementById('qtyMinus').addEventListener('click', () => { if (qty > 1) { qty--; document.getElementById('qtyVal').textContent = qty; updateTotal(); } });
+  document.getElementById('qtyPlus').addEventListener('click',  () => { if (qty < 5) { qty++; document.getElementById('qtyVal').textContent = qty; updateTotal(); } });
+  document.getElementById('calPrev').addEventListener('click', () => { calM--; if (calM < 0) { calM = 11; calY--; } renderCal(); });
+  document.getElementById('calNext').addEventListener('click', () => { calM++; if (calM > 11) { calM = 0; calY++; } renderCal(); });
+  document.getElementById('bPhone').addEventListener('input', () => {
+    let v = document.getElementById('bPhone').value.replace(/\D/g,'').slice(0,11);
+    if (v.length > 7) v = v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7);
+    else if (v.length > 3) v = v.slice(0,3)+'-'+v.slice(3);
+    document.getElementById('bPhone').value = v;
+  });
+  document.getElementById('bSubmit').addEventListener('click', () => {
+    if (!selDate)  { alert('날짜를 선택해주세요.'); return; }
+    if (!selTime)  { alert('시간을 선택해주세요.'); return; }
+    if (!document.getElementById('bName').value.trim())  { alert('이름을 입력해주세요.'); return; }
+    if (!document.getElementById('bPhone').value.trim()) { alert('연락처를 입력해주세요.'); return; }
+    alert(`예약 완료!\n\n${cur.title}\n${selDate} ${selTime}\n${qty}명\n${fmt(cur.price * qty)}`);
+  });
+
+  /* Logo bg strip */
+  const imgs = document.querySelectorAll('.logo-img');
+  if (imgs.length) {
+    const src = new Image(); src.crossOrigin = 'anonymous';
+    src.onload = function () {
+      const c = document.createElement('canvas'); c.width = src.naturalWidth; c.height = src.naturalHeight;
+      const ctx = c.getContext('2d'); ctx.drawImage(src, 0, 0);
+      try {
+        const d = ctx.getImageData(0, 0, c.width, c.height);
+        for (let i = 0; i < d.data.length; i += 4) {
+          const avg = (d.data[i]+d.data[i+1]+d.data[i+2])/3;
+          if (avg > 210) d.data[i+3] = 0;
+          else if (avg > 150) d.data[i+3] = Math.round((210-avg)/60*255);
+        }
+        ctx.putImageData(d, 0, 0);
+        const url = c.toDataURL('image/png');
+        imgs.forEach(el => el.src = url);
+      } catch(e) { imgs.forEach(el => el.style.mixBlendMode = 'multiply'); }
+    };
+    src.onerror = () => imgs.forEach(el => el.style.mixBlendMode = 'multiply');
+    src.src = '../LOGO.png';
+  }
+})();
+</script>
+</body>
+</html>

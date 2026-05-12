@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIPS — Order</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --font: 'Noto Sans KR', sans-serif;
+      --cream: #F5F5F5; --cream-dark: #ECECEC; --brown: #1A1A1A; --brown-mid: #555;
+      --accent: #444; --accent-lt: #999; --muted: #888; --red: #CC2E1C;
+      --border: rgba(0,0,0,.12);
+    }
+    html, body { background: var(--cream); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+
+    /* TOP BAR */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px; background: var(--cream); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px;
+    }
+    .top-logo img { height: 52px; width: auto; display: block; mix-blend-mode: multiply; }
+    .top-label { margin-left: auto; font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); }
+
+    /* MAIN */
+    .main { padding-top: 56px; padding-bottom: 68px; }
+
+    /* FORM */
+    .order-form { padding: 28px 20px; }
+    .form-title { font-size: 22px; font-weight: 700; color: var(--brown); margin-bottom: 6px; }
+    .form-subtitle { font-size: 11.5px; font-weight: 300; color: var(--brown-mid); line-height: 1.7; margin-bottom: 28px; }
+
+    .form-section { margin-bottom: 28px; }
+    .form-section-title {
+      font-size: 8.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted); display: flex; align-items: center; gap: 12px; margin-bottom: 16px;
+    }
+    .form-section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* PRINT TYPE GRID */
+    .type-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .type-card {
+      border: 1.5px solid var(--border); padding: 14px 12px; cursor: pointer;
+      transition: border-color .2s, background .2s; background: #fff;
+    }
+    .type-card.selected { border-color: var(--brown); background: var(--brown); }
+    .type-card-name { font-size: 12px; font-weight: 700; color: var(--brown); margin-bottom: 4px; }
+    .type-card.selected .type-card-name { color: var(--accent-lt); }
+    .type-card-desc { font-size: 10px; font-weight: 300; color: var(--muted); line-height: 1.5; }
+    .type-card.selected .type-card-desc { color: rgba(153,153,153,.7); }
+
+    /* UPLOAD ZONE */
+    .upload-zone {
+      border: 1.5px dashed rgba(0,0,0,.18); background: var(--cream-dark);
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 0;
+      height: 100px; cursor: pointer; position: relative; overflow: hidden;
+    }
+    .upload-inner {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; grid-column: 1 / -1;
+    }
+    .upload-inner.has-files { display: none; }
+    .upload-icon { font-size: 22px; color: var(--muted); }
+    .upload-text { font-size: 10px; font-weight: 500; letter-spacing: 1.5px; color: var(--muted); text-transform: uppercase; }
+    .upload-sub { font-size: 9px; font-weight: 300; color: var(--accent-lt); }
+    .upload-zone input[type="file"] { display: none; }
+    .upload-preview {
+      width: 100%; height: 100%; background-size: contain; background-repeat: no-repeat;
+      background-position: center; background-color: var(--cream-dark);
+    }
+
+    /* SPEC INPUTS */
+    .spec-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .spec-row.single { grid-template-columns: 1fr; }
+    .spec-group label { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .spec-input {
+      width: 100%; border: none; border-bottom: 1.5px solid var(--border);
+      padding: 8px 0; font-family: var(--font); font-size: 13px; font-weight: 300;
+      color: var(--brown); background: transparent; outline: none; transition: border-color .2s;
+    }
+    .spec-input:focus { border-color: var(--brown); }
+    .spec-select {
+      width: 100%; border: none; border-bottom: 1.5px solid var(--border);
+      padding: 8px 0; font-family: var(--font); font-size: 13px; font-weight: 300;
+      color: var(--brown); background: transparent; outline: none; appearance: none;
+      -webkit-appearance: none;
+    }
+
+    /* SCHEDULE RADIO */
+    .schedule-options { display: flex; flex-direction: column; gap: 10px; }
+    .schedule-opt {
+      display: flex; align-items: flex-start; gap: 12px; padding: 14px;
+      border: 1.5px solid var(--border); cursor: pointer; background: #fff;
+      transition: border-color .2s;
+    }
+    .schedule-opt.selected { border-color: var(--brown); }
+    .schedule-opt input[type="radio"] { display: none; }
+    .radio-dot { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid var(--border); flex-shrink: 0; margin-top: 2px; transition: all .2s; display: flex; align-items: center; justify-content: center; }
+    .schedule-opt.selected .radio-dot { border-color: var(--brown); background: var(--brown); }
+    .radio-dot::after { content: ''; width: 5px; height: 5px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .2s; }
+    .schedule-opt.selected .radio-dot::after { opacity: 1; }
+    .schedule-opt-label { font-size: 13px; font-weight: 700; color: var(--brown); margin-bottom: 3px; }
+    .schedule-opt-desc { font-size: 10.5px; font-weight: 300; color: var(--muted); }
+    .schedule-opt-tag { display: inline-block; font-size: 8px; font-weight: 700; letter-spacing: 1px; color: var(--red); border: 1px solid var(--red); padding: 1px 6px; margin-left: 6px; }
+
+    /* CONTACT INPUTS */
+    .contact-group { margin-bottom: 14px; }
+    .contact-group label { display: block; font-size: 8.5px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+
+    /* NOTES */
+    .notes-area {
+      width: 100%; border: none; border-bottom: 1.5px solid var(--border);
+      padding: 8px 0; font-family: var(--font); font-size: 13px; font-weight: 300;
+      color: var(--brown); background: transparent; outline: none; resize: none;
+      transition: border-color .2s; min-height: 80px;
+    }
+    .notes-area:focus { border-color: var(--brown); }
+
+    /* SUBMIT */
+    .submit-area { padding: 0 20px 28px; }
+    .price-summary { background: #fff; padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); }
+    .price-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; font-size: 11.5px; color: var(--brown-mid); font-weight: 300; }
+    .price-row.total { border-top: 1px solid var(--border); margin-top: 8px; padding-top: 12px; font-weight: 700; font-size: 14px; color: var(--brown); }
+    .submit-btn {
+      width: 100%; padding: 16px; background: var(--brown); border: none; cursor: pointer;
+      font-family: var(--font); font-size: 12px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--accent-lt); transition: background .2s;
+    }
+    .submit-btn:active { background: #333; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      height: 58px; background: #1A1A1A; border-top: 1px solid rgba(255,255,255,.06); display: flex;
+    }
+    .bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-decoration: none; font-family: var(--font); font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.32); transition: color .2s; }
+    .bottom-nav a.active { color: rgba(255,255,255,.85); }
+    .nav-pip { width: 4px; height: 4px; border-radius: 50%; background: transparent; transition: background .2s; }
+    .bottom-nav a.active .nav-pip { background: rgba(255,255,255,.7); }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <div class="top-logo"><img src="../LOGO.png" alt="TIPS" class="logo-img"></div>
+  <div class="top-label">Order</div>
+</div>
+
+<div class="main">
+  <div class="order-form">
+    <h1 class="form-title">주문 신청</h1>
+    <p class="form-subtitle">원하시는 인쇄물의 상세 정보를 입력해 주세요.<br>검토 후 견적서를 보내드립니다.</p>
+
+    <!-- 인쇄 종류 -->
+    <div class="form-section">
+      <div class="form-section-title">인쇄 종류</div>
+      <div class="type-grid" id="typeGrid">
+        <div class="type-card selected" data-type="활판">
+          <div class="type-card-name">활판 인쇄</div>
+          <div class="type-card-desc">전통 활자 압인 방식의 고급 인쇄</div>
+        </div>
+        <div class="type-card" data-type="리소">
+          <div class="type-card-name">리소그래프</div>
+          <div class="type-card-desc">개성 있는 색감의 스크린 인쇄</div>
+        </div>
+        <div class="type-card" data-type="제본">
+          <div class="type-card-name">제본</div>
+          <div class="type-card-desc">실 제본 및 다양한 바인딩</div>
+        </div>
+        <div class="type-card" data-type="기타">
+          <div class="type-card-name">기타</div>
+          <div class="type-card-desc">상담 후 결정</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 파일 업로드 -->
+    <div class="form-section">
+      <div class="form-section-title">디자인 파일</div>
+      <div class="upload-zone" id="uploadZone">
+        <div class="upload-inner" id="uploadInner">
+          <div class="upload-icon">＋</div>
+          <div class="upload-text">파일 업로드</div>
+          <div class="upload-sub">PDF, AI, PNG, JPG</div>
+        </div>
+        <input type="file" id="fileInput" accept=".pdf,.ai,.png,.jpg,.jpeg" multiple>
+      </div>
+    </div>
+
+    <!-- 사양 -->
+    <div class="form-section">
+      <div class="form-section-title">사양</div>
+      <div class="spec-row">
+        <div class="spec-group">
+          <label>규격</label>
+          <select class="spec-select">
+            <option>A4</option><option>A5</option><option>A6 (명함)</option>
+            <option>B5</option><option>B6</option><option>직접 입력</option>
+          </select>
+        </div>
+        <div class="spec-group">
+          <label>수량</label>
+          <input class="spec-input" type="number" placeholder="100" min="1">
+        </div>
+      </div>
+      <div class="spec-row">
+        <div class="spec-group">
+          <label>용지</label>
+          <select class="spec-select">
+            <option>랑데뷰 220g</option><option>문켄 200g</option>
+            <option>크래프트지</option><option>상담 후 결정</option>
+          </select>
+        </div>
+        <div class="spec-group">
+          <label>색상</label>
+          <select class="spec-select">
+            <option>1도</option><option>2도</option><option>4도</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- 작업 일정 -->
+    <div class="form-section">
+      <div class="form-section-title">작업 일정</div>
+      <div class="schedule-options" id="scheduleOpts">
+        <label class="schedule-opt selected">
+          <input type="radio" name="schedule" value="normal" checked>
+          <div class="radio-dot"></div>
+          <div>
+            <div class="schedule-opt-label">일반 <span style="font-weight:300;font-size:11px;color:var(--muted);">3 — 5일</span></div>
+            <div class="schedule-opt-desc">기본 작업 일정으로 진행됩니다.</div>
+          </div>
+        </label>
+        <label class="schedule-opt">
+          <input type="radio" name="schedule" value="urgent">
+          <div class="radio-dot"></div>
+          <div>
+            <div class="schedule-opt-label">긴급 <span style="font-weight:300;font-size:11px;color:var(--muted);">1 — 2일</span><span class="schedule-opt-tag">+30%</span></div>
+            <div class="schedule-opt-desc">빠른 납기가 필요한 경우 선택하세요.</div>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- 연락처 -->
+    <div class="form-section">
+      <div class="form-section-title">신청자 정보</div>
+      <div class="contact-group">
+        <label>이름</label>
+        <input class="spec-input" id="cName" type="text" placeholder="이름을 입력하세요">
+      </div>
+      <div class="contact-group">
+        <label>연락처</label>
+        <input class="spec-input" id="cPhone" type="tel" placeholder="010-0000-0000">
+      </div>
+      <div class="contact-group">
+        <label>이메일</label>
+        <input class="spec-input" id="cEmail" type="email" placeholder="example@email.com">
+      </div>
+      <div class="contact-group">
+        <label>요청 사항</label>
+        <textarea class="notes-area" placeholder="특이사항이나 추가 요청을 적어주세요."></textarea>
+      </div>
+    </div>
+  </div>
+
+  <!-- Submit -->
+  <div class="submit-area">
+    <div class="price-summary">
+      <div class="price-row"><span>인쇄 종류</span><span id="sumType">활판 인쇄</span></div>
+      <div class="price-row"><span>규격 / 수량</span><span>A4 / 100부</span></div>
+      <div class="price-row"><span>작업 일정</span><span id="sumSched">일반 (3—5일)</span></div>
+      <div class="price-row total"><span>견적 문의</span><span>검토 후 안내</span></div>
+    </div>
+    <button class="submit-btn" id="submitBtn">주문 신청하기</button>
+  </div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <a href="about.html"><div class="nav-pip"></div>About</a>
+  <a href="order.html" class="active"><div class="nav-pip"></div>Order</a>
+  <a href="index.html"><div class="nav-pip"></div>Program</a>
+  <a href="#"><div class="nav-pip"></div>Contact</a>
+</nav>
+
+<script>
+(function () {
+  /* Logo strip */
+  const imgs = document.querySelectorAll('.logo-img');
+  if (imgs.length) {
+    const src = new Image();
+    src.onload = function () {
+      const c = document.createElement('canvas'); c.width = src.naturalWidth; c.height = src.naturalHeight;
+      const ctx = c.getContext('2d'); ctx.drawImage(src, 0, 0);
+      try {
+        const d = ctx.getImageData(0, 0, c.width, c.height);
+        for (let i = 0; i < d.data.length; i += 4) { const avg = (d.data[i]+d.data[i+1]+d.data[i+2])/3; if (avg > 210) d.data[i+3] = 0; else if (avg > 150) d.data[i+3] = Math.round((210-avg)/60*255); }
+        ctx.putImageData(d, 0, 0); imgs.forEach(el => el.src = c.toDataURL('image/png'));
+      } catch(e) { imgs.forEach(el => el.style.mixBlendMode = 'multiply'); }
+    };
+    src.onerror = () => imgs.forEach(el => el.style.mixBlendMode = 'multiply');
+    src.src = '../LOGO.png';
+  }
+
+  /* Type cards */
+  let selType = '활판';
+  document.querySelectorAll('.type-card').forEach(c => {
+    c.addEventListener('click', () => {
+      document.querySelectorAll('.type-card').forEach(x => x.classList.remove('selected'));
+      c.classList.add('selected');
+      selType = c.dataset.type;
+      document.getElementById('sumType').textContent = c.querySelector('.type-card-name').textContent;
+    });
+  });
+
+  /* Upload */
+  const zone = document.getElementById('uploadZone');
+  const inp  = document.getElementById('fileInput');
+  const inner = document.getElementById('uploadInner');
+  zone.addEventListener('click', () => inp.click());
+  inp.addEventListener('change', () => {
+    if (!inp.files.length) return;
+    inner.style.display = 'none';
+    Array.from(inp.files).slice(0, 4).forEach((f, i) => {
+      const prev = document.createElement('div');
+      prev.className = 'upload-preview';
+      if (f.type.startsWith('image/')) {
+        const url = URL.createObjectURL(f);
+        prev.style.backgroundImage = `url(${url})`;
+      } else {
+        prev.style.background = '#e8e4dc';
+        prev.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:100%;font-size:9px;color:#999;letter-spacing:1px;">PDF</div>`;
+      }
+      zone.appendChild(prev);
+    });
+  });
+
+  /* Schedule */
+  document.querySelectorAll('.schedule-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+      document.querySelectorAll('.schedule-opt').forEach(x => x.classList.remove('selected'));
+      opt.classList.add('selected');
+      const val = opt.querySelector('input').value;
+      document.getElementById('sumSched').textContent = val === 'urgent' ? '긴급 (1—2일, +30%)' : '일반 (3—5일)';
+    });
+  });
+
+  /* Phone format */
+  document.getElementById('cPhone').addEventListener('input', function() {
+    let v = this.value.replace(/\D/g,'').slice(0,11);
+    if (v.length > 7) v = v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7);
+    else if (v.length > 3) v = v.slice(0,3)+'-'+v.slice(3);
+    this.value = v;
+  });
+
+  /* Submit */
+  document.getElementById('submitBtn').addEventListener('click', () => {
+    const name = document.getElementById('cName').value.trim();
+    const phone = document.getElementById('cPhone').value.trim();
+    const email = document.getElementById('cEmail').value.trim();
+    if (!name)  { alert('이름을 입력해주세요.'); return; }
+    if (!phone) { alert('연락처를 입력해주세요.'); return; }
+    if (!email) { alert('이메일을 입력해주세요.'); return; }
+    alert(`주문 신청이 접수되었습니다!\n\n견적서를 ${email}로 보내드리겠습니다.`);
+  });
+})();
+</script>
+</body>
+</html>

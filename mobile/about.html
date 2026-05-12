@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIPS — About</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --font: 'Noto Sans KR', sans-serif;
+      --cream: #F5F5F5; --brown: #1A1A1A; --brown-mid: #555;
+      --accent: #444; --accent-lt: #999; --muted: #888;
+      --border: rgba(0,0,0,.12);
+    }
+    html, body { background: var(--cream); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+
+    /* TOP BAR */
+    .top-bar {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      height: 56px; background: var(--cream); border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; padding: 0 20px;
+    }
+    .top-logo img { height: 52px; width: auto; display: block; mix-blend-mode: multiply; }
+    .top-label { margin-left: auto; font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); }
+
+    /* MAIN */
+    .main { padding-top: 56px; padding-bottom: 68px; }
+
+    /* BRAND HERO */
+    .brand-hero {
+      background: #0c0c0c; padding: 48px 24px;
+      display: flex; flex-direction: column; align-items: center; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .brand-hero::before {
+      content: ''; position: absolute; inset: 0; opacity: .3;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    }
+    .brand-eyebrow { font-size: 8px; font-weight: 700; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,.2); margin-bottom: 18px; position: relative; }
+    .brand-name { font-size: 32px; font-weight: 700; letter-spacing: 6px; text-transform: uppercase; color: rgba(255,255,255,.88); line-height: 1; margin-bottom: 8px; position: relative; }
+    .brand-sub { font-size: 9px; font-weight: 300; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,.25); position: relative; }
+    .brand-rule { width: 28px; height: 1px; background: rgba(255,255,255,.15); margin: 20px auto; position: relative; }
+    .brand-tagline { font-size: 12px; font-weight: 300; color: rgba(255,255,255,.28); letter-spacing: 1px; line-height: 1.7; position: relative; }
+
+    /* SECTION */
+    .section { padding: 32px 20px 0; }
+    .section-tag {
+      font-size: 8.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase;
+      color: var(--muted); display: flex; align-items: center; gap: 12px; margin-bottom: 20px;
+    }
+    .section-tag::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* TEAM PHOTO */
+    .team-photo { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; margin-bottom: 24px; }
+
+    /* INTRO TEXT */
+    .intro-heading { font-size: 26px; font-weight: 700; color: var(--brown); line-height: 1.15; margin-bottom: 14px; letter-spacing: -0.3px; }
+    .intro-desc { font-size: 12.5px; font-weight: 300; color: var(--brown-mid); line-height: 1.85; margin-bottom: 28px; }
+
+    /* MEMBER TABLE */
+    .member-table { width: 100%; border-collapse: collapse; font-family: var(--font); }
+    .member-table thead tr { border-bottom: 1.5px solid var(--border); }
+    .member-table th { font-size: 8px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--muted); padding: 0 0 10px; text-align: left; }
+    .member-table tbody tr { border-bottom: 1px solid var(--border); }
+    .member-table tbody tr:last-child { border-bottom: none; }
+    .member-table td { padding: 13px 0; font-size: 11px; font-weight: 300; color: var(--brown-mid); line-height: 1.6; vertical-align: top; padding-right: 8px; }
+    .role-label { font-weight: 700; color: var(--brown); font-size: 11px; }
+    .role-tag { display: block; font-size: 7.5px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent-lt); margin-top: 3px; }
+
+    /* SERVICE SLOT */
+    .service-section { padding: 32px 20px 0; }
+    .shop-name { font-size: 13px; font-weight: 700; letter-spacing: 3px; color: var(--brown); margin-bottom: 10px; }
+    .shop-tagline { font-size: 20px; font-weight: 700; color: var(--brown); line-height: 1.4; margin-bottom: 24px; }
+
+    .svc-list { display: flex; flex-direction: column; align-items: center; gap: 0; padding: 8px 0 0; }
+    .svc-item { font-size: 13px; font-weight: 300; letter-spacing: 2px; color: rgba(0,0,0,.2); line-height: 1; padding: 9px 0; }
+    .svc-featured { display: flex; align-items: center; font-size: 14px; font-weight: 700; color: var(--brown); letter-spacing: 1px; padding: 9px 0; gap: 4px; }
+    .svc-paren { font-weight: 300; color: var(--brown-mid); font-size: 16px; line-height: 1; display: inline-flex; align-items: center; height: 6.4em; vertical-align: middle; }
+    .svc-slot-outer { display: inline-block; overflow: hidden; width: 130px; height: 6.4em; vertical-align: middle; text-align: center;
+      -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%);
+      mask-image: linear-gradient(to bottom, transparent 0%, black 22%, black 78%, transparent 100%); }
+    .svc-slot-reel { display: flex; flex-direction: column; align-items: center; will-change: transform; }
+    .svc-slot-reel span { display: block; height: 1.6em; line-height: 1.6em; font-size: 14px; font-weight: 700; color: var(--brown); white-space: nowrap; }
+
+    /* BOTTOM NAV */
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 100;
+      height: 58px; background: #1A1A1A; border-top: 1px solid rgba(255,255,255,.06);
+      display: flex;
+    }
+    .bottom-nav a { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px; text-decoration: none; font-family: var(--font); font-size: 9px; font-weight: 500; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,.32); transition: color .2s; }
+    .bottom-nav a.active { color: rgba(255,255,255,.85); }
+    .nav-pip { width: 4px; height: 4px; border-radius: 50%; background: transparent; transition: background .2s; }
+    .bottom-nav a.active .nav-pip { background: rgba(255,255,255,.7); }
+
+    .section-spacer { height: 32px; }
+  </style>
+</head>
+<body>
+
+<!-- Top bar -->
+<div class="top-bar">
+  <div class="top-logo"><img src="../LOGO.png" alt="TIPS" class="logo-img"></div>
+  <div class="top-label">About</div>
+</div>
+
+<div class="main">
+  <!-- Brand hero -->
+  <div class="brand-hero">
+    <div class="brand-eyebrow">Seoul · Korea</div>
+    <div class="brand-name">Three<br>Idiots</div>
+    <div class="brand-sub">Paper Service</div>
+    <div class="brand-rule"></div>
+    <div class="brand-tagline">새롭고 기상천외한 것들을<br>만듭니다.</div>
+  </div>
+
+  <!-- About section -->
+  <div class="section">
+    <div class="section-tag">About</div>
+    <img class="team-photo" src="../LOGO.png" alt="Team photo" style="mix-blend-mode:multiply; background:#ece9e3;">
+    <h2 class="intro-heading">세 얼간이의<br>인쇄소</h2>
+    <p class="intro-desc">
+      Three Idiots Paper Service는 인쇄라는 매체를 통해 새롭고 기상천외한 것들을 만들어가는 세 명의 얼간이들이 운영하는 워크숍 기반 인쇄소입니다. 활판, 리소그래프, 제본 등 전통과 실험이 공존하는 작업들을 함께 경험합니다.
+    </p>
+
+    <div class="section-tag">Team</div>
+    <table class="member-table">
+      <thead>
+        <tr>
+          <th>역할</th>
+          <th>담당</th>
+          <th>특징</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><div class="role-label">브레인 얼간이</div><div class="role-tag">Brain</div></td>
+          <td>기획 및 전략</td>
+          <td>겉으로 멀쩡해 보이지만 가장 엉뚱한 아이디어 뱅크</td>
+        </tr>
+        <tr>
+          <td><div class="role-label">행동파 얼간이</div><div class="role-tag">Maker</div></td>
+          <td>실행 및 제작</td>
+          <td>일단 저지르고 보는 스타일, 추진력만큼은 NASA급</td>
+        </tr>
+        <tr>
+          <td><div class="role-label">분위기 얼간이</div><div class="role-tag">Vibe</div></td>
+          <td>홍보 및 소통</td>
+          <td>웃음소리만으로 주변을 정복하는 인간 비타민</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Service slot -->
+  <div class="service-section">
+    <div class="section-tag">Service</div>
+    <div class="shop-name">THREE IDIOTS PAPER SERVICE</div>
+    <div class="shop-tagline">기상천외한 인쇄물을<br>함께 만듭니다.</div>
+
+    <div class="svc-list">
+      <div class="svc-item">Printing</div>
+      <div class="svc-item">Workshop</div>
+      <div class="svc-featured">
+        기상천외한&nbsp;
+        <span class="svc-paren">(</span>
+        <span class="svc-slot-outer">
+          <div class="svc-slot-reel" id="svcSlotReel">
+            <span>Binding</span><span>Books</span><span>Posters</span><span>Stickers</span><span>Zines</span><span>Flyers</span><span>Cards</span><span>Prints</span><span>Banners</span><span>Notebooks</span><span>Labels</span><span>Stamps</span><span>Invites</span><span>Tickets</span><span>Riso</span><span>Magazines</span><span>Leaflets</span><span>Patches</span>
+            <span>Binding</span><span>Books</span><span>Posters</span><span>Stickers</span><span>Zines</span><span>Flyers</span><span>Cards</span><span>Prints</span><span>Banners</span><span>Notebooks</span><span>Labels</span><span>Stamps</span><span>Invites</span><span>Tickets</span><span>Riso</span><span>Magazines</span><span>Leaflets</span><span>Patches</span>
+            <span>Binding</span><span>Books</span><span>Posters</span><span>Stickers</span><span>Zines</span><span>Flyers</span><span>Cards</span><span>Prints</span><span>Banners</span><span>Notebooks</span><span>Labels</span><span>Stamps</span><span>Invites</span><span>Tickets</span><span>Riso</span><span>Magazines</span><span>Leaflets</span><span>Patches</span>
+          </div>
+        </span>
+        <span class="svc-paren">)</span>
+      </div>
+      <div class="svc-item">Masterclass</div>
+      <div class="svc-item">Letterpress</div>
+    </div>
+  </div>
+
+  <div class="section-spacer"></div>
+</div>
+
+<!-- Bottom nav -->
+<nav class="bottom-nav">
+  <a href="about.html" class="active"><div class="nav-pip"></div>About</a>
+  <a href="order.html"><div class="nav-pip"></div>Order</a>
+  <a href="index.html"><div class="nav-pip"></div>Program</a>
+  <a href="#"><div class="nav-pip"></div>Contact</a>
+</nav>
+
+<script>
+(function () {
+  /* Logo strip */
+  const imgs = document.querySelectorAll('.logo-img');
+  if (imgs.length) {
+    const src = new Image();
+    src.onload = function () {
+      const c = document.createElement('canvas'); c.width = src.naturalWidth; c.height = src.naturalHeight;
+      const ctx = c.getContext('2d'); ctx.drawImage(src, 0, 0);
+      try {
+        const d = ctx.getImageData(0, 0, c.width, c.height);
+        for (let i = 0; i < d.data.length; i += 4) { const avg = (d.data[i]+d.data[i+1]+d.data[i+2])/3; if (avg > 210) d.data[i+3] = 0; else if (avg > 150) d.data[i+3] = Math.round((210-avg)/60*255); }
+        ctx.putImageData(d, 0, 0); imgs.forEach(el => el.src = c.toDataURL('image/png'));
+      } catch(e) { imgs.forEach(el => el.style.mixBlendMode = 'multiply'); }
+    };
+    src.onerror = () => imgs.forEach(el => el.style.mixBlendMode = 'multiply');
+    src.src = '../LOGO.png';
+  }
+
+  /* Slot machine */
+  (function initSlot() {
+    const reel = document.getElementById('svcSlotReel');
+    if (!reel) return;
+    document.fonts.ready.then(() => {
+      const spans = Array.from(reel.children);
+      const third = spans.length / 3;
+      const itemH = spans[0].getBoundingClientRect().height;
+      const slotH = reel.parentElement.getBoundingClientRect().height;
+      const fullSetH = itemH * third;
+      const yFor = i => slotH / 2 - (third + i + 0.5) * itemH;
+      const kfEl = document.createElement('style');
+      kfEl.textContent = `@keyframes slot-fast { from { transform: translateY(${yFor(0)}px); } to { transform: translateY(${yFor(0) - fullSetH}px); } }`;
+      document.head.appendChild(kfEl);
+      let cur = 0;
+      function snap(i) { reel.style.animation = 'none'; reel.style.transition = 'none'; reel.style.filter = ''; void reel.offsetWidth; reel.style.transform = `translateY(${yFor(i)}px)`; }
+      function spin() { reel.style.transition = 'none'; reel.style.animation = 'none'; void reel.offsetWidth; reel.style.filter = 'blur(2.5px)'; reel.style.animation = 'slot-fast 0.13s linear infinite'; }
+      function stopAt(i, cb) { const m = getComputedStyle(reel).transform; reel.style.animation = 'none'; reel.style.filter = ''; reel.style.transform = m; void reel.offsetWidth; reel.style.transition = 'transform 0.2s cubic-bezier(0.05,0.9,0.2,1)'; reel.style.transform = `translateY(${yFor(i)}px)`; reel.addEventListener('transitionend', function h(){ reel.removeEventListener('transitionend',h); cb && cb(); }); }
+      function cycle() { let next; do { next = Math.floor(Math.random() * third); } while (next === cur); spin(); setTimeout(() => stopAt(next, () => { cur = next; setTimeout(cycle, 800 + Math.random() * 600); }), 700 + Math.random() * 400); }
+      snap(0); setTimeout(cycle, 900);
+    });
+  })();
+})();
+</script>
+</body>
+</html>
