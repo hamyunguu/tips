@@ -784,9 +784,82 @@
       }
       .booking-back-detail:hover { color: rgba(255,255,255,.7); }
     }
+  /* ── INTRO ANIMATION ─────────────────────────────── */
+  #introOverlay {
+    position: fixed; inset: 0; z-index: 99999;
+    pointer-events: all;
+  }
+  .intro-panel {
+    position: absolute; top: 0; bottom: 0; width: 50%;
+    background: #090909;
+    transition: transform 1.0s cubic-bezier(0.76, 0, 0.24, 1);
+    will-change: transform;
+  }
+  .intro-l {
+    left: 0; transform-origin: left center;
+    box-shadow: inset -1px 0 0 rgba(255,255,255,.06);
+  }
+  .intro-r {
+    right: 0; transform-origin: right center;
+    box-shadow: inset 1px 0 0 rgba(255,255,255,.06);
+  }
+  .intro-spine {
+    position: absolute; top: 0; bottom: 0; left: 50%;
+    width: 1px; background: rgba(255,255,255,.08);
+    transform: translateX(-50%); z-index: 1;
+    transition: opacity 0.3s ease;
+  }
+  .intro-center {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2; text-align: center;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+  }
+  .intro-logo-img {
+    height: 80px; width: auto;
+    display: block;
+    filter: invert(1);
+    opacity: 0;
+    transform: scale(0.88);
+    animation: introLogoIn 0.55s 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  }
+  .intro-sub {
+    font-family: var(--font-main); font-size: 8px;
+    letter-spacing: 4px; text-transform: uppercase;
+    color: rgba(255,255,255,.22); margin-top: 16px;
+    opacity: 0;
+    animation: introFadeIn 0.4s 0.6s ease forwards;
+  }
+  @keyframes introLogoIn {
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes introFadeIn {
+    to { opacity: 1; }
+  }
+  #introOverlay.open .intro-l {
+    transform: perspective(1400px) rotateY(-10deg) translateX(-100%);
+  }
+  #introOverlay.open .intro-r {
+    transform: perspective(1400px) rotateY(10deg) translateX(100%);
+  }
+  #introOverlay.open .intro-center { opacity: 0; }
+  #introOverlay.open .intro-spine  { opacity: 0; }
+  #introOverlay.gone { display: none; }
   </style>
 </head>
 <body>
+
+<!-- INTRO OVERLAY -->
+<div id="introOverlay">
+  <div class="intro-panel intro-l"></div>
+  <div class="intro-panel intro-r"></div>
+  <div class="intro-spine"></div>
+  <div class="intro-center">
+    <img class="intro-logo-img" src="LOGO.png" alt="THREE Idiots Paper Service">
+    <div class="intro-sub">Three Idiots Paper Service</div>
+  </div>
+</div>
 
 <div id="bookOverlay"></div>
 
@@ -1594,6 +1667,18 @@ spineEl.addEventListener('mouseleave', () => {
   });
 })();
 
+</script>
+
+<script>
+  /* ── INTRO OPEN ── */
+  (function(){
+    const ov = document.getElementById('introOverlay');
+    /* logo appears (0.25s delay in CSS), hold, then open */
+    setTimeout(function(){
+      ov.classList.add('open');
+      setTimeout(function(){ ov.classList.add('gone'); }, 1050);
+    }, 1400);
+  })();
 </script>
 </body>
 </html>
