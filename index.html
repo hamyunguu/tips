@@ -309,16 +309,21 @@
     }
 
     .books-grid {
-      columns: 5;
-      column-gap: 5px;
+      display: flex;
+      gap: 5px;
+      align-items: flex-start;
+    }
+    .books-col {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
     }
 
     .book-item {
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      break-inside: avoid;
-      margin-bottom: 5px;
     }
     /* hover: 약간 어둡게만 */
     .book-item::after {
@@ -1520,6 +1525,16 @@ spineEl.addEventListener('mouseleave', () => {
   document.addEventListener('mouseup', () => { bdoDrag = false; bdoScene.classList.remove('dragging'); });
 
   /* ── build grid ── */
+  /* 5 column divs — all start at the same top */
+  const NUM_COLS = 5;
+  const colEls = Array.from({length: NUM_COLS}, () => {
+    const c = document.createElement('div');
+    c.className = 'books-col';
+    gridEl.appendChild(c);
+    return c;
+  });
+  const colHeights = new Array(NUM_COLS).fill(0);
+
   booksData.forEach(b => {
     const item = document.createElement('div');
     item.className = 'book-item';
@@ -1528,7 +1543,10 @@ spineEl.addEventListener('mouseleave', () => {
       `<div class="bi-cover" style="background:${b.color};aspect-ratio:${w}/${h};"></div>` +
       `<div class="bi-hover"><div class="bi-htitle">${b.title}</div><div class="bi-hsize">${b.size}</div></div>`;
     item.addEventListener('click', () => openBook(b));
-    gridEl.appendChild(item);
+    /* add to shortest column */
+    const minIdx = colHeights.indexOf(Math.min(...colHeights));
+    colEls[minIdx].appendChild(item);
+    colHeights[minIdx] += h / w; /* track relative height */
   });
 
   /* ── open detail ── */
