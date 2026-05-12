@@ -787,77 +787,89 @@
   /* ── INTRO ANIMATION ─────────────────────────────── */
   #introOverlay {
     position: fixed; inset: 0; z-index: 99999;
+    background: #0a0a0a;
+    display: flex; align-items: center; justify-content: center;
     pointer-events: all;
+    transition: opacity 0.55s ease;
   }
-  .intro-panel {
-    position: absolute; top: 0; bottom: 0; width: 50%;
-    background: #090909;
-    transition: transform 1.0s cubic-bezier(0.76, 0, 0.24, 1);
-    will-change: transform;
+  #introOverlay.gone { opacity: 0; pointer-events: none; }
+
+  /* 3D book scene */
+  .ib-scene {
+    perspective: 1100px;
+    perspective-origin: 50% 45%;
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0;
+    animation: ibSceneIn 0.7s 0.2s cubic-bezier(0.34,1.4,0.64,1) forwards;
   }
-  .intro-l {
-    left: 0; transform-origin: left center;
-    box-shadow: inset -1px 0 0 rgba(255,255,255,.06);
+  @keyframes ibSceneIn {
+    from { opacity: 0; transform: scale(0.7) translateY(24px); }
+    to   { opacity: 1; transform: scale(1)   translateY(0);    }
   }
-  .intro-r {
-    right: 0; transform-origin: right center;
-    box-shadow: inset 1px 0 0 rgba(255,255,255,.06);
+
+  /* book wrapper — preserve-3d, JS sets transform for rotation */
+  .ib-book { transform-style: preserve-3d; position: relative; }
+
+  /* faces */
+  .ib-face { position: absolute; backface-visibility: hidden; overflow: hidden; }
+
+  /* front cover — rotates open around left (spine) edge */
+  .ib-front {
+    transform-style: preserve-3d;
+    transform-origin: 0 50%;          /* left-center = spine edge */
+    transition: transform 1.05s cubic-bezier(0.45, 0, 0.55, 1);
+    display: flex; align-items: center; justify-content: center;
   }
-  .intro-spine {
-    position: absolute; top: 0; bottom: 0; left: 50%;
-    width: 1px; background: rgba(255,255,255,.08);
-    transform: translateX(-50%); z-index: 1;
-    transition: opacity 0.3s ease;
-  }
-  .intro-center {
-    position: absolute; top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 2; text-align: center;
+  .ib-front img {
+    width: 55%; filter: invert(1); opacity: 0.9;
     pointer-events: none;
-    transition: opacity 0.35s ease;
   }
-  .intro-logo-img {
-    height: 80px; width: auto;
-    display: block;
-    filter: invert(1);
-    opacity: 0;
-    transform: scale(0.88);
-    animation: introLogoIn 0.55s 0.25s cubic-bezier(0.34,1.56,0.64,1) forwards;
+  .ib-back   { background: #1a1a1a; }
+  .ib-back::after { content:''; position:absolute; inset:12%; border:1px solid rgba(255,255,255,.08); }
+  .ib-spine  { background: linear-gradient(180deg,#080808 0%,#181818 40%,#0e0e0e 100%); }
+  .ib-spine::after { content:''; position:absolute; top:0; right:0; bottom:0; width:1px; background:rgba(255,255,255,.1); }
+  .ib-pages  { background: repeating-linear-gradient(to bottom,#f8f4ee 0,#f8f4ee 1.5px,#ece8e0 1.5px,#ece8e0 3px); }
+  .ib-top    { background: repeating-linear-gradient(90deg,#f0ece4 0,#f0ece4 0.5px,#e4e0d8 0.5px,#e4e0d8 4px); }
+  .ib-bot    { background: repeating-linear-gradient(90deg,#e8e4dc 0,#e8e4dc 0.5px,#dcd8d0 0.5px,#dcd8d0 4px); }
+
+  /* inside of cover (revealed as cover opens) */
+  .ib-front-inside {
+    position: absolute; inset: 0;
+    background: #f5f1eb;
+    backface-visibility: hidden;
+    transform: rotateY(180deg);       /* back side of the cover */
   }
-  .intro-sub {
-    font-family: var(--font-main); font-size: 8px;
-    letter-spacing: 4px; text-transform: uppercase;
-    color: rgba(255,255,255,.22); margin-top: 16px;
-    opacity: 0;
-    animation: introFadeIn 0.4s 0.6s ease forwards;
+
+  /* shadow under book */
+  .ib-shadow {
+    position: absolute; bottom: -24px; left: 50%;
+    transform: translateX(-50%);
+    height: 28px;
+    background: radial-gradient(ellipse,rgba(0,0,0,.55) 0%,transparent 70%);
+    filter: blur(10px); pointer-events: none;
+    transition: width .3s;
   }
-  @keyframes introLogoIn {
-    to { opacity: 1; transform: scale(1); }
-  }
-  @keyframes introFadeIn {
-    to { opacity: 1; }
-  }
-  #introOverlay.open .intro-l {
-    transform: perspective(1400px) rotateY(-10deg) translateX(-100%);
-  }
-  #introOverlay.open .intro-r {
-    transform: perspective(1400px) rotateY(10deg) translateX(100%);
-  }
-  #introOverlay.open .intro-center { opacity: 0; }
-  #introOverlay.open .intro-spine  { opacity: 0; }
-  #introOverlay.gone { display: none; }
   </style>
 </head>
 <body>
 
 <!-- INTRO OVERLAY -->
 <div id="introOverlay">
-  <div class="intro-panel intro-l"></div>
-  <div class="intro-panel intro-r"></div>
-  <div class="intro-spine"></div>
-  <div class="intro-center">
-    <img class="intro-logo-img" src="LOGO.png" alt="THREE Idiots Paper Service">
-    <div class="intro-sub">Three Idiots Paper Service</div>
+  <div class="ib-scene" id="ibScene">
+    <div style="position:relative;">
+      <div class="ib-book" id="ibBook">
+        <div class="ib-face ib-front" id="ibFront">
+          <img src="LOGO.png" alt="TIPS">
+          <div class="ib-front-inside"></div>
+        </div>
+        <div class="ib-face ib-back"  id="ibBack"></div>
+        <div class="ib-face ib-spine" id="ibSpine"></div>
+        <div class="ib-face ib-pages" id="ibPages"></div>
+        <div class="ib-face ib-top"   id="ibTop"></div>
+        <div class="ib-face ib-bot"   id="ibBot"></div>
+      </div>
+      <div class="ib-shadow" id="ibShadow"></div>
+    </div>
   </div>
 </div>
 
@@ -1670,15 +1682,86 @@ spineEl.addEventListener('mouseleave', () => {
 </script>
 
 <script>
-  /* ── INTRO OPEN ── */
-  (function(){
-    const ov = document.getElementById('introOverlay');
-    /* logo appears (0.25s delay in CSS), hold, then open */
-    setTimeout(function(){
-      ov.classList.add('open');
-      setTimeout(function(){ ov.classList.add('gone'); }, 1050);
-    }, 1400);
-  })();
+/* ── INTRO 3D BOOK ── */
+(function(){
+  const IW = 180, IH = 260, ID = 16;  /* book dims */
+
+  const book    = document.getElementById('ibBook');
+  const front   = document.getElementById('ibFront');
+  const back    = document.getElementById('ibBack');
+  const spine   = document.getElementById('ibSpine');
+  const pages   = document.getElementById('ibPages');
+  const topF    = document.getElementById('ibTop');
+  const botF    = document.getElementById('ibBot');
+  const shadow  = document.getElementById('ibShadow');
+  const overlay = document.getElementById('introOverlay');
+
+  /* size the book */
+  book.style.width  = IW + 'px';
+  book.style.height = IH + 'px';
+
+  function setFace(el, w, h, tf, extra) {
+    el.style.width  = w + 'px';
+    el.style.height = h + 'px';
+    el.style.left   = ((IW - w) / 2) + 'px';
+    el.style.top    = ((IH - h) / 2) + 'px';
+    el.style.transform = tf;
+    if (extra) Object.assign(el.style, extra);
+  }
+
+  setFace(front,  IW, IH, `translateZ(${ID/2}px)`);
+  setFace(back,   IW, IH, `rotateY(180deg) translateZ(${ID/2}px)`);
+  setFace(spine,  ID, IH, `rotateY(-90deg) translateZ(${IW/2}px)`);
+  setFace(pages,  ID, IH, `rotateY(90deg)  translateZ(${IW/2}px)`);
+  setFace(topF,   IW, ID, `rotateX(90deg)  translateZ(${IH/2}px)`);
+  setFace(botF,   IW, ID, `rotateX(-90deg) translateZ(${IH/2}px)`);
+
+  /* front cover needs transform-origin at left edge (spine side) */
+  front.style.left           = '0';
+  front.style.transformOrigin = '0 50%';
+  front.style.transform      = `translateZ(${ID/2}px)`;
+
+  shadow.style.width = (IW + ID * 0.6) + 'px';
+
+  /* initial rotation */
+  let rotX = -12, rotY = 28;
+  book.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+
+  /* Phase 1: gentle auto-rotate (0.9s after scene fades in = ~1.1s total) */
+  let startTime = null;
+  const HOLD_MS = 1300;   /* hold before opening */
+  const OPEN_MS = 1050;   /* cover-open duration (matches CSS transition) */
+
+  function animRotate(ts) {
+    if (!startTime) startTime = ts;
+    const elapsed = ts - startTime;
+    if (elapsed < HOLD_MS) {
+      /* gently sway: rotY 28 → 18 → 24 */
+      const t = elapsed / HOLD_MS;
+      rotY = 28 - Math.sin(t * Math.PI) * 10;
+      book.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+      requestAnimationFrame(animRotate);
+    } else {
+      /* Phase 2: rotate to near-face-on then open cover */
+      book.style.transition = 'transform 0.55s ease-out';
+      book.style.transform  = `rotateX(-8deg) rotateY(5deg)`;
+
+      setTimeout(function(){
+        /* Phase 3: front cover swings open */
+        front.style.transform = `translateZ(${ID/2}px) rotateY(-155deg)`;
+
+        /* fade overlay after cover is mostly open */
+        setTimeout(function(){
+          overlay.classList.add('gone');
+          setTimeout(function(){ overlay.style.display = 'none'; }, 600);
+        }, OPEN_MS * 0.65);
+      }, 580);
+    }
+  }
+
+  /* start animation after scene entrance (book fades in at 0.2s + 0.7s anim = 0.9s) */
+  setTimeout(function(){ requestAnimationFrame(animRotate); }, 900);
+})();
 </script>
 </body>
 </html>
