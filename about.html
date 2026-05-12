@@ -302,19 +302,28 @@
         grid-template-areas: "spine" "left" "right";
         height: auto; min-height: 100vh; transition: none;
       }
-      .spine { flex-direction: row; padding: 0 20px; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,.45); }
+      .spine { flex-direction: row; padding: 0 16px; justify-content: flex-end; box-shadow: 0 4px 20px rgba(0,0,0,.45); }
       .spine::before { background-image: none; }
-      .spine-brand, .spine.spine-open .spine-brand { writing-mode: horizontal-tb; opacity: 1; font-size: 11px; pointer-events: auto; }
-      .spine-nav, .spine.spine-open .spine-nav { flex-direction: row; gap: 16px; padding: 0; align-items: center; width: auto; }
-      .spine-nav a, .spine.spine-open .spine-nav a { writing-mode: horizontal-tb; font-size: 11px; letter-spacing: 1.5px; width: auto; padding: 0; }
+      .spine-brand, .spine.spine-open .spine-brand { display: none !important; }
+      .spine-nav, .spine.spine-open .spine-nav { flex-direction: row; gap: 20px; padding: 0; align-items: center; width: auto; }
+      .spine-nav a, .spine.spine-open .spine-nav a { writing-mode: horizontal-tb; font-size: 10.5px; letter-spacing: 1.5px; width: auto; padding: 0; }
       .spine-nav a:hover, .spine.spine-open .spine-nav a:hover { background: none; }
       .spine-deco, .spine.spine-open .spine-deco { display: none; }
       .page-left { box-shadow: none; }
+      .page-header { padding: 0 20px; height: 48px; }
+      .page-header .logo-img { height: 42px !important; }
       .about-body { padding-bottom: 40px; }
-      .idiots-section, .shop-section { padding-left: 24px; padding-right: 24px; }
-      .section-divider { margin-left: 24px; margin-right: 24px; }
-      .page-header { padding: 16px 24px 14px; }
-      .team-photo { width: 180px; }
+      .idiots-section { padding: 24px 20px 0; }
+      .shop-section { padding: 24px 20px 0; }
+      .section-divider { margin-left: 20px; margin-right: 20px; }
+      /* 팀 사진: float 해제, 전체 너비 */
+      .team-photo { float: none !important; width: 100% !important; margin: 16px 0 20px !important; }
+      /* 텍스트 가독성 */
+      .idiots-heading { font-size: 22px; margin-top: 12px; margin-bottom: 12px; }
+      .idiots-desc { font-size: 12px; }
+      .member-table th { font-size: 7.5px; }
+      .member-table td { font-size: 11px; padding: 10px 6px 10px 0; }
+      .member-table .role-label { font-size: 11px; }
       .page-right { min-height: 300px; }
       .brand-name { font-size: 22px; letter-spacing: 5px; }
     }

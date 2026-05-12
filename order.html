@@ -1566,15 +1566,17 @@ document.addEventListener('mouseup', () => { dragging = false; bookScene.classLi
 /* ── Touch drag rotation ── */
 bookScene.addEventListener('touchstart', e => {
   dragging = true; lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY;
-}, { passive: true });
+  e.preventDefault();
+}, { passive: false });
 document.addEventListener('touchmove', e => {
   if (!dragging) return;
+  e.preventDefault();
   rotY += (e.touches[0].clientX - lastMX) * 0.45;
   rotX -= (e.touches[0].clientY - lastMY) * 0.45;
   rotX  = Math.max(-75, Math.min(75, rotX));
   lastMX = e.touches[0].clientX; lastMY = e.touches[0].clientY;
   applyRot();
-}, { passive: true });
+}, { passive: false });
 document.addEventListener('touchend', () => { dragging = false; });
 
 /* ════════════════════════════════════════════
