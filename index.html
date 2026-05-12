@@ -282,7 +282,7 @@
       font-weight: 700; color: var(--brown);
     }
 
-    /* ── RIGHT PAGE — Branding ────────────────────── */
+    /* ── RIGHT PAGE ─────────────────────────────── */
     .page-right {
       grid-area: right;
       background: #080808;
@@ -290,61 +290,139 @@
       display: flex;
       overflow: hidden;
     }
-    /* Dark branding panel — full width of right page */
-    .brand-panel {
+
+    /* ── BOOKS GRID WRAP — scrollable ────────────── */
+    .books-grid-wrap {
       flex: 1;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
-      position: relative; padding: 40px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      padding: 18px 13px 24px;
+      transition: filter 0.35s ease, opacity 0.35s ease;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255,255,255,.1) transparent;
     }
-    /* Subtle grain */
-    .brand-panel::before {
-      content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .4;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
-    }
-    /* Corner bracket decoration */
-    .brand-panel::after {
-      content: '';
-      position: absolute; bottom: 32px; right: 32px;
-      width: 36px; height: 36px;
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      border-right: 1px solid rgba(255,255,255,.08);
+    .books-grid-wrap::-webkit-scrollbar { width: 3px; }
+    .books-grid-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 2px; }
+    .books-grid-wrap.blurred {
+      filter: blur(14px) brightness(0.2);
       pointer-events: none;
     }
 
-    .brand-content { position: relative; z-index: 1; text-align: center; }
-    .brand-eyebrow {
-      font-family: var(--font-main); font-size: 8px; font-weight: 700;
-      letter-spacing: 5px; text-transform: uppercase;
-      color: rgba(255,255,255,.22); margin-bottom: 22px;
+    .books-grid {
+      columns: 2;
+      column-gap: 10px;
     }
-    .brand-name {
-      font-family: var(--font-main); font-size: 28px; font-weight: 700;
-      letter-spacing: 6px; text-transform: uppercase;
-      color: rgba(255,255,255,.88); line-height: 1;
+
+    .book-item {
+      break-inside: avoid;
       margin-bottom: 10px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s ease;
     }
-    .brand-sub {
-      font-family: var(--font-main); font-size: 9px; font-weight: 300;
-      letter-spacing: 5px; text-transform: uppercase;
-      color: rgba(255,255,255,.28);
+    .book-item:hover { transform: scale(1.025); }
+    .book-item:hover .bi-hover { opacity: 1; }
+
+    .bi-cover {
+      width: 100%;
+      display: block;
     }
-    .brand-rule {
-      width: 32px; height: 1px;
-      background: rgba(255,255,255,.15);
-      margin: 24px auto;
+
+    .bi-hover {
+      position: absolute;
+      bottom: 0; left: 0; right: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.78) 0%, transparent 100%);
+      padding: 22px 11px 11px;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+      pointer-events: none;
     }
-    .brand-tagline {
-      font-family: var(--font-main); font-size: 11px; font-weight: 300;
-      color: rgba(255,255,255,.28); letter-spacing: 1.5px;
-      line-height: 1.7;
+    .bi-htitle {
+      font-family: var(--font-main); font-size: 9.5px; font-weight: 700;
+      letter-spacing: 1.5px; color: rgba(255,255,255,.88);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      margin-bottom: 3px;
     }
-    /* Est. corner */
-    .brand-est {
-      position: absolute; top: 28px; left: 36px;
+    .bi-hsize {
       font-family: var(--font-main); font-size: 8px; font-weight: 300;
-      letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.14);
+      color: rgba(255,255,255,.42); letter-spacing: 0.5px;
     }
+
+    /* ── BOOK DETAIL OVERLAY ─────────────────────── */
+    .book-detail-overlay {
+      position: absolute; inset: 0; z-index: 10;
+      background: #070707;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.3s ease;
+      display: flex; flex-direction: column;
+      overflow-y: auto;
+    }
+    .book-detail-overlay.active { opacity: 1; pointer-events: all; }
+    .book-detail-overlay::-webkit-scrollbar { width: 3px; }
+    .book-detail-overlay::-webkit-scrollbar-thumb { background: rgba(255,255,255,.14); border-radius: 2px; }
+
+    .bdo-close {
+      position: sticky; top: 0; z-index: 2;
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 22px;
+      font-family: var(--font-main); font-size: 9px; letter-spacing: 2.5px;
+      text-transform: uppercase; color: rgba(255,255,255,.28);
+      cursor: pointer; background: #070707;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      transition: color 0.2s; user-select: none; flex-shrink: 0;
+    }
+    .bdo-close:hover { color: rgba(255,255,255,.7); }
+
+    /* 3-D book preview */
+    .bdo-preview {
+      display: flex; align-items: center; justify-content: center;
+      padding: 44px 24px 32px;
+      flex-shrink: 0;
+    }
+    .b3d-wrap { position: relative; display: inline-block; }
+    .b3d-cover {
+      position: relative; display: block;
+      transform: perspective(600px) rotateY(-18deg) rotateX(4deg);
+      transition: transform 0.55s ease;
+      box-shadow: 14px 18px 52px rgba(0,0,0,.78);
+    }
+    .bdo-preview:hover .b3d-cover {
+      transform: perspective(600px) rotateY(-28deg) rotateX(6deg);
+    }
+    .b3d-cover::after {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background: linear-gradient(145deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.04) 35%, transparent 60%, rgba(0,0,0,.14) 100%);
+    }
+    .b3d-edge {
+      position: absolute;
+      top: 2%; right: -11px;
+      width: 11px; height: 96%;
+      transform: skewY(0.5deg);
+      filter: brightness(0.38);
+    }
+
+    /* Specs section */
+    .bdo-body { padding: 6px 24px 48px; flex: 1; }
+    .bdo-tag {
+      font-family: var(--font-main); font-size: 7.5px; font-weight: 700;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(255,255,255,.18); margin-bottom: 10px;
+    }
+    .bdo-title {
+      font-family: var(--font-main); font-size: 16px; font-weight: 700;
+      color: rgba(255,255,255,.84); line-height: 1.45; margin-bottom: 20px;
+      letter-spacing: -0.2px;
+    }
+    .bdo-divider { height: 1px; background: rgba(255,255,255,.07); margin-bottom: 20px; }
+    .bdo-spec {
+      display: flex; justify-content: space-between; align-items: baseline;
+      padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05);
+      font-family: var(--font-main); font-size: 11px;
+    }
+    .bdo-spec:last-child { border-bottom: none; }
+    .bdo-spec-k { color: rgba(255,255,255,.28); font-weight: 300; }
+    .bdo-spec-v { color: rgba(255,255,255,.7); font-weight: 500; text-align: right; letter-spacing: 0.3px; }
 
     /* ── DETAIL PANEL (left page overlay) ──────────── */
     .detail-panel {
@@ -419,7 +497,7 @@
 
     /* ── BOOKING PANEL (right page overlay) ─────────── */
     .booking-panel {
-      position: absolute; inset: 0; z-index: 5;
+      position: absolute; inset: 0; z-index: 15;
       background: #111;
       overflow-y: auto; overflow-x: hidden;
       transform: translateX(100%);
@@ -641,8 +719,9 @@
       .section-divider { margin-left: 24px; margin-right: 24px; }
       .member-layout { grid-template-columns: 1fr; }
       .team-photo { height: 200px; }
-      .page-right { min-height: 300px; }
-      .brand-name { font-size: 22px; letter-spacing: 5px; }
+      .page-right { min-height: 400px; }
+      .books-grid { columns: 2; }
+      .book-detail-overlay { z-index: 20; }
 
       /* ── 모바일 detail/booking 2단계 분리 ── */
       /* 두 패널 모두 fixed 풀스크린으로 */
@@ -832,20 +911,34 @@
   </nav>
 
 
-  <!-- ═══ RIGHT PAGE — Branding ════════════════════════════════ -->
+  <!-- ═══ RIGHT PAGE — Books Grid ══════════════════════════════ -->
   <div class="page-right">
-    <div class="brand-panel">
-      <div class="brand-est">Est. 2026</div>
-      <div class="brand-content">
-        <div class="brand-eyebrow">Seoul · Korea</div>
-        <div class="brand-name">Three<br>Idiots</div>
-        <div class="brand-sub">Paper Service</div>
-        <div class="brand-rule"></div>
-        <div class="brand-tagline">
-          새롭고 기상천외한 것들을<br>만듭니다.
+
+    <!-- Books masonry grid -->
+    <div class="books-grid-wrap" id="booksGridWrap">
+      <div class="books-grid" id="booksGrid"></div>
+    </div>
+
+    <!-- Book product detail overlay -->
+    <div class="book-detail-overlay" id="bookDetailOverlay">
+      <div class="bdo-close" id="bdoClose">
+        <span style="font-size:13px;line-height:1;">←</span>
+        <span>돌아가기</span>
+      </div>
+      <div class="bdo-preview">
+        <div class="b3d-wrap">
+          <div class="b3d-cover" id="b3dCover"></div>
+          <div class="b3d-edge" id="b3dEdge"></div>
         </div>
       </div>
+      <div class="bdo-body">
+        <div class="bdo-tag">Paper Works</div>
+        <h3 class="bdo-title" id="bdoTitle"></h3>
+        <div class="bdo-divider"></div>
+        <div id="bdoSpecList"></div>
+      </div>
     </div>
+
     <!-- ── Booking Panel ── -->
     <div class="booking-panel" id="bookingPanel">
       <!-- 모바일 전용: 상세로 돌아가기 -->
@@ -1233,6 +1326,138 @@ spineEl.addEventListener('mouseleave', () => {
       bookEl.classList.remove('booking-open');
       cur = null;
     });
+  });
+})();
+
+
+/* ════════════════════════════════════════════
+   BOOKS GRID — Right Page
+════════════════════════════════════════════ */
+(function () {
+  const booksData = [
+    {
+      title: 'Quiet Forms Vol.1',
+      color: '#B8AA96', aspect: [148, 210],
+      size: 'A5 · 148 × 210mm', paper: '랑데뷰 내추럴',     weight: '100g/m²', finish: '무코팅',   binding: '무선제본'
+    },
+    {
+      title: 'Surface Studies',
+      color: '#6A7E96', aspect: [210, 210],
+      size: '정방형 · 210 × 210mm', paper: '몬디알 화이트',  weight: '120g/m²', finish: '매트코팅', binding: '양장제본'
+    },
+    {
+      title: 'Fold & Press',
+      color: '#A88A68', aspect: [105, 148],
+      size: 'A6 · 105 × 148mm',  paper: '크라프트 내추럴',  weight: '80g/m²',  finish: '무코팅',   binding: '중철제본'
+    },
+    {
+      title: 'Paper Weight',
+      color: '#4E6070', aspect: [128, 182],
+      size: 'B5 · 128 × 182mm',  paper: '랑데뷰 그레이',    weight: '140g/m²', finish: '무광코팅', binding: '실 제본'
+    },
+    {
+      title: 'Grain & Light',
+      color: '#C8BCA8', aspect: [148, 210],
+      size: 'A5 · 148 × 210mm',  paper: '몬디알 아이보리',  weight: '100g/m²', finish: '무코팅',   binding: '양장제본'
+    },
+    {
+      title: 'Edition No.3',
+      color: '#728068', aspect: [148, 148],
+      size: '정방형 · 148 × 148mm', paper: '랑데뷰 그린',   weight: '90g/m²',  finish: '무코팅',   binding: '중철제본'
+    },
+    {
+      title: 'Imprint Series',
+      color: '#907060', aspect: [105, 148],
+      size: 'A6 · 105 × 148mm',  paper: '크라프트 브라운',  weight: '80g/m²',  finish: '무코팅',   binding: '중철제본'
+    },
+    {
+      title: 'Between Lines',
+      color: '#888478', aspect: [170, 240],
+      size: '170 × 240mm',       paper: '랑데뷰 오프화이트', weight: '120g/m²', finish: '무광코팅', binding: '실 제본'
+    },
+    {
+      title: 'Offset No.9',
+      color: '#5C6E80', aspect: [210, 297],
+      size: 'A4 · 210 × 297mm',  paper: '몬디알 화이트',    weight: '90g/m²',  finish: '매트코팅', binding: '무선제본'
+    },
+    {
+      title: 'Risograph No.2',
+      color: '#A09080', aspect: [148, 210],
+      size: 'A5 · 148 × 210mm',  paper: '오프셋 내추럴',    weight: '80g/m²',  finish: '무코팅',   binding: '중철제본'
+    },
+    {
+      title: 'Press Proof',
+      color: '#B4A090', aspect: [210, 148],
+      size: '가로형 · 210 × 148mm', paper: '랑데뷰 내추럴', weight: '100g/m²', finish: '무코팅',   binding: '중철제본'
+    },
+    {
+      title: 'Tactile No.1',
+      color: '#7888A4', aspect: [130, 190],
+      size: '130 × 190mm',       paper: '먼켄 퓨어',        weight: '115g/m²', finish: '무코팅',   binding: '실 제본'
+    },
+  ];
+
+  const gridEl    = document.getElementById('booksGrid');
+  const wrapEl    = document.getElementById('booksGridWrap');
+  const overlayEl = document.getElementById('bookDetailOverlay');
+  const closeBtn  = document.getElementById('bdoClose');
+  const titleEl   = document.getElementById('bdoTitle');
+  const specList  = document.getElementById('bdoSpecList');
+  const coverEl   = document.getElementById('b3dCover');
+  const edgeEl    = document.getElementById('b3dEdge');
+
+  /* ── build grid ── */
+  booksData.forEach(b => {
+    const item = document.createElement('div');
+    item.className = 'book-item';
+    const [w, h] = b.aspect;
+    item.innerHTML =
+      `<div class="bi-cover" style="background:${b.color};aspect-ratio:${w}/${h};"></div>` +
+      `<div class="bi-hover"><div class="bi-htitle">${b.title}</div><div class="bi-hsize">${b.size}</div></div>`;
+    item.addEventListener('click', () => openBook(b));
+    gridEl.appendChild(item);
+  });
+
+  /* ── darken hex ── */
+  function darken(hex, amt) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = Math.max(0, (n >> 16) - amt);
+    const g = Math.max(0, ((n >> 8) & 0xff) - amt);
+    const bl = Math.max(0, (n & 0xff) - amt);
+    return '#' + [r, g, bl].map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+
+  /* ── open detail ── */
+  function openBook(b) {
+    /* 3-D cover sizing */
+    const maxH = 190;
+    const [w, h] = b.aspect;
+    const cH = maxH;
+    const cW = Math.round(maxH * w / h);
+    coverEl.style.cssText = `background:${b.color};width:${cW}px;height:${cH}px;`;
+    edgeEl.style.cssText  = `background:${darken(b.color, 45)};width:11px;height:${Math.round(cH * 0.96)}px;`;
+
+    /* title + specs */
+    titleEl.textContent = b.title;
+    specList.innerHTML = [
+      ['사이즈', b.size],
+      ['용지',   b.paper],
+      ['평량',   b.weight],
+      ['코팅',   b.finish],
+      ['제본',   b.binding],
+    ].map(([k, v]) =>
+      `<div class="bdo-spec"><span class="bdo-spec-k">${k}</span><span class="bdo-spec-v">${v}</span></div>`
+    ).join('');
+
+    overlayEl.classList.add('active');
+    wrapEl.classList.add('blurred');
+    overlayEl.scrollTop = 0;
+  }
+
+  /* ── close detail ── */
+  closeBtn.addEventListener('click', () => {
+    overlayEl.classList.remove('active');
+    wrapEl.classList.remove('blurred');
   });
 })();
 
