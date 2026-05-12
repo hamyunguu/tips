@@ -159,11 +159,45 @@
 
     /* ── OVERLAY ── */
     #ov { position: fixed; inset: 0; z-index: 200; background: #0c0c0c; opacity: 0; pointer-events: none; }
+
+    /* ── CONFIRM OVERLAY ── */
+    #confirmOv {
+      position: fixed; inset: 0; z-index: 300; background: #0c0c0c;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none; transition: opacity 0.4s ease;
+    }
+    #confirmOv.show { opacity: 1; pointer-events: all; }
+    .conf-wrap { text-align: center; padding: 40px 28px; width: 100%; }
+    .conf-check { width: 64px; height: 64px; border-radius: 50%; border: 1px solid rgba(255,255,255,.18); display: flex; align-items: center; justify-content: center; font-size: 28px; color: rgba(255,255,255,.65); margin: 0 auto 24px; }
+    .conf-eyebrow { font-size: 8px; font-weight: 700; letter-spacing: 5px; text-transform: uppercase; color: rgba(255,255,255,.2); margin-bottom: 12px; }
+    .conf-title { font-size: 20px; font-weight: 700; color: rgba(255,255,255,.88); margin-bottom: 24px; line-height: 1.4; }
+    .conf-rule { width: 28px; height: 1px; background: rgba(255,255,255,.12); margin: 0 auto 24px; }
+    .conf-prog { font-size: 13px; font-weight: 700; color: rgba(255,255,255,.72); margin-bottom: 18px; }
+    .conf-rows { margin-bottom: 32px; text-align: left; }
+    .conf-row { display: flex; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,.06); font-size: 12px; font-weight: 300; }
+    .conf-row:last-child { border-bottom: none; }
+    .conf-row span:first-child { color: rgba(255,255,255,.3); }
+    .conf-row span:last-child { color: rgba(255,255,255,.72); }
+    .conf-row.total span:last-child { font-size: 15px; font-weight: 700; color: rgba(255,255,255,.9); }
+    .conf-home { padding: 14px 36px; background: none; border: 1px solid rgba(255,255,255,.18); cursor: pointer; font-family: var(--font); font-size: 9.5px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.45); }
   </style>
 </head>
 <body>
 
 <div id="ov"></div>
+
+<!-- 예약 완료 오버레이 -->
+<div id="confirmOv">
+  <div class="conf-wrap">
+    <div class="conf-check">✓</div>
+    <div class="conf-eyebrow">Booking Confirmed</div>
+    <h2 class="conf-title">예약이<br>완료되었습니다</h2>
+    <div class="conf-rule"></div>
+    <div class="conf-prog" id="confProg"></div>
+    <div class="conf-rows" id="confRows"></div>
+    <button class="conf-home" id="confHome">처음으로 돌아가기</button>
+  </div>
+</div>
 
 <!-- Top bar -->
 <div class="top-bar">
@@ -430,12 +464,29 @@
     else if (v.length > 3) v = v.slice(0,3)+'-'+v.slice(3);
     document.getElementById('bPhone').value = v;
   });
+  const confirmOv = document.getElementById('confirmOv');
   document.getElementById('bSubmit').addEventListener('click', () => {
     if (!selDate)  { alert('날짜를 선택해주세요.'); return; }
     if (!selTime)  { alert('시간을 선택해주세요.'); return; }
-    if (!document.getElementById('bName').value.trim())  { alert('이름을 입력해주세요.'); return; }
-    if (!document.getElementById('bPhone').value.trim()) { alert('연락처를 입력해주세요.'); return; }
-    alert(`예약 완료!\n\n${cur.title}\n${selDate} ${selTime}\n${qty}명\n${fmt(cur.price * qty)}`);
+    const name  = document.getElementById('bName').value.trim();
+    const phone = document.getElementById('bPhone').value.trim();
+    if (!name)  { alert('이름을 입력해주세요.'); return; }
+    if (!phone) { alert('연락처를 입력해주세요.'); return; }
+
+    document.getElementById('confProg').textContent = cur.title;
+    document.getElementById('confRows').innerHTML = `
+      <div class="conf-row"><span>날짜</span><span>${selDate}</span></div>
+      <div class="conf-row"><span>시간</span><span>${selTime}</span></div>
+      <div class="conf-row"><span>인원</span><span>${qty}명</span></div>
+      <div class="conf-row"><span>신청자</span><span>${name}</span></div>
+      <div class="conf-row total"><span>합계</span><span>${fmt(cur.price * qty)}</span></div>
+    `;
+    confirmOv.classList.add('show');
+  });
+
+  document.getElementById('confHome').addEventListener('click', () => {
+    confirmOv.classList.remove('show');
+    fade(() => { document.getElementById('detailView').classList.remove('open'); cur = null; });
   });
 
   /* Logo bg strip */

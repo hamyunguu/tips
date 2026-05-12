@@ -556,6 +556,60 @@
     }
     .booking-submit:hover { background: #fff; }
 
+    /* ── BOOKING CONFIRM OVERLAY ────────────────────── */
+    #confirmOverlay {
+      position: fixed; inset: 0; z-index: 300;
+      background: #0c0c0c;
+      display: flex; align-items: center; justify-content: center;
+      opacity: 0; pointer-events: none;
+      transition: opacity 0.4s ease;
+    }
+    #confirmOverlay.show { opacity: 1; pointer-events: all; }
+
+    .confirm-wrap { text-align: center; padding: 40px 32px; max-width: 380px; width: 100%; }
+
+    .confirm-check {
+      width: 68px; height: 68px; border-radius: 50%;
+      border: 1px solid rgba(255,255,255,.18);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 30px; color: rgba(255,255,255,.65);
+      margin: 0 auto 28px;
+    }
+    .confirm-label {
+      font-family: var(--font-main); font-size: 8px; font-weight: 700;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: rgba(255,255,255,.2); margin-bottom: 14px;
+    }
+    .confirm-title {
+      font-family: var(--font-main); font-size: 20px; font-weight: 700;
+      color: rgba(255,255,255,.88); margin-bottom: 28px; line-height: 1.4;
+    }
+    .confirm-rule { width: 28px; height: 1px; background: rgba(255,255,255,.12); margin: 0 auto 28px; }
+    .confirm-prog {
+      font-family: var(--font-main); font-size: 13px; font-weight: 700;
+      color: rgba(255,255,255,.75); margin-bottom: 16px;
+    }
+    .confirm-rows { margin-bottom: 36px; }
+    .confirm-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,.06);
+      font-family: var(--font-main); font-size: 11.5px; font-weight: 300;
+    }
+    .confirm-row:last-child { border-bottom: none; }
+    .confirm-row-label { color: rgba(255,255,255,.3); }
+    .confirm-row-val { color: rgba(255,255,255,.72); }
+    .confirm-row.total .confirm-row-label { font-weight: 700; color: rgba(255,255,255,.5); }
+    .confirm-row.total .confirm-row-val { font-size: 16px; font-weight: 700; color: rgba(255,255,255,.9); }
+
+    .confirm-home {
+      padding: 14px 44px;
+      background: none; border: 1px solid rgba(255,255,255,.18); cursor: pointer;
+      font-family: var(--font-main); font-size: 9.5px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,.45); transition: all 0.2s;
+    }
+    .confirm-home:hover { border-color: rgba(255,255,255,.45); color: rgba(255,255,255,.85); }
+
     /* ── PAGE TRANSITION OVERLAY ────────────────────── */
     #bookOverlay {
       position: fixed; inset: 0; z-index: 200;
@@ -625,6 +679,19 @@
 <body>
 
 <div id="bookOverlay"></div>
+
+<!-- 예약 완료 오버레이 -->
+<div id="confirmOverlay">
+  <div class="confirm-wrap">
+    <div class="confirm-check">✓</div>
+    <div class="confirm-label">Booking Confirmed</div>
+    <h2 class="confirm-title">예약이<br>완료되었습니다</h2>
+    <div class="confirm-rule"></div>
+    <div class="confirm-prog" id="confirmProg"></div>
+    <div class="confirm-rows" id="confirmRows"></div>
+    <button class="confirm-home" id="confirmHome">처음으로 돌아가기</button>
+  </div>
+</div>
 
 <div class="book" id="book">
 
@@ -1135,13 +1202,37 @@ spineEl.addEventListener('mouseleave', () => {
     bookingPhone.value = v;
   });
 
-  /* submit */
+  /* submit → 예약 완료 페이지 */
+  const confirmOverlay = document.getElementById('confirmOverlay');
+  const confirmProg    = document.getElementById('confirmProg');
+  const confirmRows    = document.getElementById('confirmRows');
+
   document.getElementById('bookingSubmit').addEventListener('click', () => {
     if (!selDate)  { alert('날짜를 선택해주세요.'); return; }
     if (!selTime)  { alert('시간을 선택해주세요.'); return; }
     if (!bookingName.value.trim())  { alert('이름을 입력해주세요.'); return; }
     if (!bookingPhone.value.trim()) { alert('연락처를 입력해주세요.'); return; }
-    alert(`예약이 완료되었습니다!\n\n프로그램: ${cur.title}\n일정: ${selDate} ${selTime}\n인원: ${qty}명\n합계: ${fmt(cur.price * qty)}`);
+
+    /* 완료 화면 내용 채우기 */
+    confirmProg.textContent = cur.title;
+    confirmRows.innerHTML = `
+      <div class="confirm-row"><span class="confirm-row-label">날짜</span><span class="confirm-row-val">${selDate}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">시간</span><span class="confirm-row-val">${selTime}</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">인원</span><span class="confirm-row-val">${qty}명</span></div>
+      <div class="confirm-row"><span class="confirm-row-label">신청자</span><span class="confirm-row-val">${bookingName.value.trim()}</span></div>
+      <div class="confirm-row total"><span class="confirm-row-label">합계</span><span class="confirm-row-val">${fmt(cur.price * qty)}</span></div>
+    `;
+    confirmOverlay.classList.add('show');
+  });
+
+  /* 처음으로 돌아가기 */
+  document.getElementById('confirmHome').addEventListener('click', () => {
+    confirmOverlay.classList.remove('show');
+    runTransition(() => {
+      bookEl.classList.remove('detail-open');
+      bookEl.classList.remove('booking-open');
+      cur = null;
+    });
   });
 })();
 
