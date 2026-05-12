@@ -296,8 +296,8 @@
       flex: 1;
       overflow-y: auto;
       overflow-x: hidden;
-      padding: 18px 13px 24px;
-      transition: filter 0.35s ease, opacity 0.35s ease;
+      padding: 12px 10px 16px;
+      transition: filter 0.35s ease;
       scrollbar-width: thin;
       scrollbar-color: rgba(255,255,255,.1) transparent;
     }
@@ -309,44 +309,49 @@
     }
 
     .books-grid {
-      columns: 2;
-      column-gap: 10px;
+      columns: 5;
+      column-gap: 7px;
     }
 
     .book-item {
       break-inside: avoid;
-      margin-bottom: 10px;
+      margin-bottom: 7px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      transition: transform 0.22s ease;
     }
-    .book-item:hover { transform: scale(1.025); }
+    /* hover: 약간 어둡게만 */
+    .book-item::after {
+      content: '';
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0);
+      transition: background 0.2s ease;
+      pointer-events: none;
+    }
+    .book-item:hover::after { background: rgba(0,0,0,.32); }
     .book-item:hover .bi-hover { opacity: 1; }
 
-    .bi-cover {
-      width: 100%;
-      display: block;
-    }
+    .bi-cover { width: 100%; display: block; }
 
     .bi-hover {
       position: absolute;
       bottom: 0; left: 0; right: 0;
-      background: linear-gradient(to top, rgba(0,0,0,.78) 0%, transparent 100%);
-      padding: 22px 11px 11px;
+      background: linear-gradient(to top, rgba(0,0,0,.82) 0%, transparent 100%);
+      padding: 18px 8px 8px;
       opacity: 0;
       transition: opacity 0.2s ease;
       pointer-events: none;
+      z-index: 1;
     }
     .bi-htitle {
-      font-family: var(--font-main); font-size: 9.5px; font-weight: 700;
-      letter-spacing: 1.5px; color: rgba(255,255,255,.88);
+      font-family: var(--font-main); font-size: 8px; font-weight: 700;
+      letter-spacing: 1px; color: rgba(255,255,255,.88);
       white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      margin-bottom: 3px;
+      margin-bottom: 2px;
     }
     .bi-hsize {
-      font-family: var(--font-main); font-size: 8px; font-weight: 300;
-      color: rgba(255,255,255,.42); letter-spacing: 0.5px;
+      font-family: var(--font-main); font-size: 7px; font-weight: 300;
+      color: rgba(255,255,255,.42); letter-spacing: 0.3px;
     }
 
     /* ── BOOK DETAIL OVERLAY ─────────────────────── */
@@ -356,6 +361,7 @@
       opacity: 0; pointer-events: none;
       transition: opacity 0.3s ease;
       display: flex; flex-direction: column;
+      align-items: center;
       overflow-y: auto;
     }
     .book-detail-overlay.active { opacity: 1; pointer-events: all; }
@@ -364,6 +370,7 @@
 
     .bdo-close {
       position: sticky; top: 0; z-index: 2;
+      align-self: stretch;
       display: flex; align-items: center; gap: 8px;
       padding: 14px 22px;
       font-family: var(--font-main); font-size: 9px; letter-spacing: 2.5px;
@@ -374,51 +381,68 @@
     }
     .bdo-close:hover { color: rgba(255,255,255,.7); }
 
-    /* 3-D book preview */
+    /* ── CSS 3D book (order.html 엔진 이식) ─────── */
     .bdo-preview {
-      display: flex; align-items: center; justify-content: center;
-      padding: 44px 24px 32px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 40px 24px 20px;
       flex-shrink: 0;
     }
-    .b3d-wrap { position: relative; display: inline-block; }
-    .b3d-cover {
-      position: relative; display: block;
-      transform: perspective(600px) rotateY(-18deg) rotateX(4deg);
-      transition: transform 0.55s ease;
-      box-shadow: 14px 18px 52px rgba(0,0,0,.78);
+    .bdo-book-scene {
+      perspective: 1000px; perspective-origin: 50% 45%;
+      display: flex; align-items: center; justify-content: center;
+      position: relative; cursor: grab; user-select: none; overflow: visible;
+      margin-bottom: 70px;
     }
-    .bdo-preview:hover .b3d-cover {
-      transform: perspective(600px) rotateY(-28deg) rotateX(6deg);
+    .bdo-book-scene.dragging { cursor: grabbing; }
+    .bdo-book-shadow {
+      position: absolute; bottom: -18px; left: 50%;
+      transform: translateX(-50%);
+      height: 22px; pointer-events: none;
+      background: radial-gradient(ellipse, rgba(0,0,0,.5) 0%, transparent 70%);
+      filter: blur(8px); transition: width .3s;
     }
-    .b3d-cover::after {
-      content: ''; position: absolute; inset: 0; pointer-events: none;
-      background: linear-gradient(145deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,.04) 35%, transparent 60%, rgba(0,0,0,.14) 100%);
+    .bdo-book-3d { transform-style: preserve-3d; position: relative; }
+    .bdo-bk-f { position: absolute; backface-visibility: hidden; overflow: hidden; }
+    .bdo-bk-back  { background: #1e1e1e; }
+    .bdo-bk-back::after { content: ''; position: absolute; inset: 12%; border: 1px solid rgba(153,153,153,.1); }
+    .bdo-bk-spine {
+      background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 40%, #111 100%);
+      position: relative;
     }
-    .b3d-edge {
-      position: absolute;
-      top: 2%; right: -11px;
-      width: 11px; height: 96%;
-      transform: skewY(0.5deg);
-      filter: brightness(0.38);
+    .bdo-bk-spine::after { content: ''; position: absolute; top: 0; right: 0; bottom: 0; width: 1px; background: rgba(255,255,255,.1); }
+    .bdo-bk-pages {
+      background: repeating-linear-gradient(to bottom, #f8f4ee 0px, #f8f4ee 1.5px, #ece8e0 1.5px, #ece8e0 3px);
+    }
+    .bdo-bk-top { background: repeating-linear-gradient(90deg, #f0ece4 0px, #f0ece4 0.5px, #e4e0d8 0.5px, #e4e0d8 4px); }
+    .bdo-bk-bot { background: repeating-linear-gradient(90deg, #e8e4dc 0px, #e8e4dc 0.5px, #dcd8d0 0.5px, #dcd8d0 4px); }
+    .bdo-hint {
+      font-family: var(--font-main); font-size: 8px; font-weight: 300;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: rgba(255,255,255,.16); margin-top: 4px;
     }
 
     /* Specs section */
-    .bdo-body { padding: 6px 24px 48px; flex: 1; }
+    .bdo-body {
+      width: 100%; max-width: 480px;
+      padding: 8px 28px 52px;
+      text-align: center;
+    }
     .bdo-tag {
       font-family: var(--font-main); font-size: 7.5px; font-weight: 700;
       letter-spacing: 4px; text-transform: uppercase;
       color: rgba(255,255,255,.18); margin-bottom: 10px;
     }
     .bdo-title {
-      font-family: var(--font-main); font-size: 16px; font-weight: 700;
-      color: rgba(255,255,255,.84); line-height: 1.45; margin-bottom: 20px;
+      font-family: var(--font-main); font-size: 17px; font-weight: 700;
+      color: rgba(255,255,255,.85); line-height: 1.45; margin-bottom: 22px;
       letter-spacing: -0.2px;
     }
     .bdo-divider { height: 1px; background: rgba(255,255,255,.07); margin-bottom: 20px; }
     .bdo-spec {
       display: flex; justify-content: space-between; align-items: baseline;
       padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,.05);
-      font-family: var(--font-main); font-size: 11px;
+      font-family: var(--font-main); font-size: 11px; text-align: left;
     }
     .bdo-spec:last-child { border-bottom: none; }
     .bdo-spec-k { color: rgba(255,255,255,.28); font-weight: 300; }
@@ -926,10 +950,18 @@
         <span>돌아가기</span>
       </div>
       <div class="bdo-preview">
-        <div class="b3d-wrap">
-          <div class="b3d-cover" id="b3dCover"></div>
-          <div class="b3d-edge" id="b3dEdge"></div>
+        <div class="bdo-book-scene" id="bdoBookScene">
+          <div class="bdo-book-3d" id="bdoBook3d">
+            <div class="bdo-bk-f bdo-bk-front" id="bdoFront"></div>
+            <div class="bdo-bk-f bdo-bk-back"  id="bdoBack"></div>
+            <div class="bdo-bk-f bdo-bk-spine" id="bdoSpineF"></div>
+            <div class="bdo-bk-f bdo-bk-pages" id="bdoPages"></div>
+            <div class="bdo-bk-f bdo-bk-top"   id="bdoTop"></div>
+            <div class="bdo-bk-f bdo-bk-bot"   id="bdoBot"></div>
+          </div>
+          <div class="bdo-book-shadow" id="bdoShadow"></div>
         </div>
+        <div class="bdo-hint">드래그하여 회전</div>
       </div>
       <div class="bdo-body">
         <div class="bdo-tag">Paper Works</div>
@@ -1331,80 +1363,114 @@ spineEl.addEventListener('mouseleave', () => {
 
 
 /* ════════════════════════════════════════════
-   BOOKS GRID — Right Page
+   BOOKS GRID + 3D BOOK PREVIEW — Right Page
 ════════════════════════════════════════════ */
 (function () {
+  /* ── Data ── */
   const booksData = [
-    {
-      title: 'Quiet Forms Vol.1',
-      color: '#B8AA96', aspect: [148, 210],
-      size: 'A5 · 148 × 210mm', paper: '랑데뷰 내추럴',     weight: '100g/m²', finish: '무코팅',   binding: '무선제본'
-    },
-    {
-      title: 'Surface Studies',
-      color: '#6A7E96', aspect: [210, 210],
-      size: '정방형 · 210 × 210mm', paper: '몬디알 화이트',  weight: '120g/m²', finish: '매트코팅', binding: '양장제본'
-    },
-    {
-      title: 'Fold & Press',
-      color: '#A88A68', aspect: [105, 148],
-      size: 'A6 · 105 × 148mm',  paper: '크라프트 내추럴',  weight: '80g/m²',  finish: '무코팅',   binding: '중철제본'
-    },
-    {
-      title: 'Paper Weight',
-      color: '#4E6070', aspect: [128, 182],
-      size: 'B5 · 128 × 182mm',  paper: '랑데뷰 그레이',    weight: '140g/m²', finish: '무광코팅', binding: '실 제본'
-    },
-    {
-      title: 'Grain & Light',
-      color: '#C8BCA8', aspect: [148, 210],
-      size: 'A5 · 148 × 210mm',  paper: '몬디알 아이보리',  weight: '100g/m²', finish: '무코팅',   binding: '양장제본'
-    },
-    {
-      title: 'Edition No.3',
-      color: '#728068', aspect: [148, 148],
-      size: '정방형 · 148 × 148mm', paper: '랑데뷰 그린',   weight: '90g/m²',  finish: '무코팅',   binding: '중철제본'
-    },
-    {
-      title: 'Imprint Series',
-      color: '#907060', aspect: [105, 148],
-      size: 'A6 · 105 × 148mm',  paper: '크라프트 브라운',  weight: '80g/m²',  finish: '무코팅',   binding: '중철제본'
-    },
-    {
-      title: 'Between Lines',
-      color: '#888478', aspect: [170, 240],
-      size: '170 × 240mm',       paper: '랑데뷰 오프화이트', weight: '120g/m²', finish: '무광코팅', binding: '실 제본'
-    },
-    {
-      title: 'Offset No.9',
-      color: '#5C6E80', aspect: [210, 297],
-      size: 'A4 · 210 × 297mm',  paper: '몬디알 화이트',    weight: '90g/m²',  finish: '매트코팅', binding: '무선제본'
-    },
-    {
-      title: 'Risograph No.2',
-      color: '#A09080', aspect: [148, 210],
-      size: 'A5 · 148 × 210mm',  paper: '오프셋 내추럴',    weight: '80g/m²',  finish: '무코팅',   binding: '중철제본'
-    },
-    {
-      title: 'Press Proof',
-      color: '#B4A090', aspect: [210, 148],
-      size: '가로형 · 210 × 148mm', paper: '랑데뷰 내추럴', weight: '100g/m²', finish: '무코팅',   binding: '중철제본'
-    },
-    {
-      title: 'Tactile No.1',
-      color: '#7888A4', aspect: [130, 190],
-      size: '130 × 190mm',       paper: '먼켄 퓨어',        weight: '115g/m²', finish: '무코팅',   binding: '실 제본'
-    },
+    { title:'Quiet Forms Vol.1', color:'#C0B4A2', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'랑데뷰 내추럴',      weight:'100g/m²', finish:'무코팅',   binding:'무선제본' },
+    { title:'Surface Studies',   color:'#7888A0', aspect:[210,210], size:'정방형 · 210 × 210mm', paper:'몬디알 화이트',      weight:'120g/m²', finish:'매트코팅', binding:'양장제본' },
+    { title:'Fold & Press',      color:'#B0926E', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 내추럴',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Paper Weight',      color:'#5A6878', aspect:[128,182], size:'B5 · 128 × 182mm',    paper:'랑데뷰 그레이',      weight:'140g/m²', finish:'무광코팅', binding:'실 제본'  },
+    { title:'Grain & Light',     color:'#C8BAA4', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'몬디알 아이보리',    weight:'100g/m²', finish:'무코팅',   binding:'양장제본' },
+    { title:'Edition No.3',      color:'#7A8870', aspect:[148,148], size:'정방형 · 148 × 148mm', paper:'랑데뷰 그린',        weight:'90g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Imprint Series',    color:'#987864', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 브라운',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Between Lines',     color:'#909088', aspect:[170,240], size:'170 × 240mm',          paper:'랑데뷰 오프화이트',  weight:'120g/m²', finish:'무광코팅', binding:'실 제본'  },
+    { title:'Offset No.9',       color:'#68788A', aspect:[210,297], size:'A4 · 210 × 297mm',    paper:'몬디알 화이트',      weight:'90g/m²',  finish:'매트코팅', binding:'무선제본' },
+    { title:'Risograph No.2',    color:'#A89880', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'오프셋 내추럴',      weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
+    { title:'Press Proof',       color:'#B4A090', aspect:[210,148], size:'가로형 · 210 × 148mm', paper:'랑데뷰 내추럴',      weight:'100g/m²', finish:'무코팅',   binding:'중철제본' },
+    { title:'Tactile No.1',      color:'#7888A4', aspect:[130,190], size:'130 × 190mm',          paper:'먼켄 퓨어',          weight:'115g/m²', finish:'무코팅',   binding:'실 제본'  },
+    { title:'Soft Proof',        color:'#9E9080', aspect:[148,210], size:'A5 · 148 × 210mm',    paper:'랑데뷰 화이트',      weight:'90g/m²',  finish:'무코팅',   binding:'무선제본' },
+    { title:'Monograph 04',      color:'#607080', aspect:[190,270], size:'190 × 270mm',          paper:'먼켄 내추럴',        weight:'100g/m²', finish:'무코팅',   binding:'양장제본' },
+    { title:'Hand Press',        color:'#887868', aspect:[105,148], size:'A6 · 105 × 148mm',    paper:'크라프트 내추럴',    weight:'80g/m²',  finish:'무코팅',   binding:'중철제본' },
   ];
 
+  /* ── DOM refs ── */
   const gridEl    = document.getElementById('booksGrid');
   const wrapEl    = document.getElementById('booksGridWrap');
   const overlayEl = document.getElementById('bookDetailOverlay');
   const closeBtn  = document.getElementById('bdoClose');
   const titleEl   = document.getElementById('bdoTitle');
   const specList  = document.getElementById('bdoSpecList');
-  const coverEl   = document.getElementById('b3dCover');
-  const edgeEl    = document.getElementById('b3dEdge');
+
+  const bdoScene  = document.getElementById('bdoBookScene');
+  const bdoBook3d = document.getElementById('bdoBook3d');
+  const bdoFront  = document.getElementById('bdoFront');
+  const bdoBack   = document.getElementById('bdoBack');
+  const bdoSpineF = document.getElementById('bdoSpineF');
+  const bdoPages  = document.getElementById('bdoPages');
+  const bdoTop    = document.getElementById('bdoTop');
+  const bdoBot    = document.getElementById('bdoBot');
+  const bdoShadow = document.getElementById('bdoShadow');
+
+  /* ── 3D state ── */
+  const BDO_D = 14;
+  let BDO_W = 0, BDO_H = 0;
+  let bdoRotX = -12, bdoRotY = 28;
+  let bdoDrag = false, bdoLX = 0, bdoLY = 0;
+
+  /* ── helpers ── */
+  function darken(hex, amt) {
+    const n = parseInt(hex.slice(1), 16);
+    const r = Math.max(0, (n >> 16) - amt);
+    const g = Math.max(0, ((n >> 8) & 0xff) - amt);
+    const b = Math.max(0, (n & 0xff) - amt);
+    return '#' + [r, g, b].map(x => x.toString(16).padStart(2,'0')).join('');
+  }
+
+  function bdoSetFace(el, w, h, tf) {
+    el.style.width  = w + 'px'; el.style.height = h + 'px';
+    el.style.left   = ((BDO_W - w) / 2) + 'px';
+    el.style.top    = ((BDO_H - h) / 2) + 'px';
+    el.style.marginLeft = '0'; el.style.marginTop = '0';
+    el.style.transform  = tf;
+  }
+
+  function bdoApplyRot() {
+    bdoBook3d.style.transform = `rotateX(${bdoRotX}deg) rotateY(${bdoRotY}deg)`;
+  }
+
+  function buildBook3D(color, aw, ah) {
+    const targetH = 230;
+    BDO_H = targetH;
+    BDO_W = Math.max(60, Math.round(targetH * aw / ah));
+
+    bdoBook3d.style.width  = BDO_W + 'px';
+    bdoBook3d.style.height = BDO_H + 'px';
+    bdoScene.style.width       = (BDO_W + BDO_D + 90) + 'px';
+    bdoScene.style.height      = (BDO_H + BDO_D + 70) + 'px';
+    bdoScene.style.perspective = Math.max(700, BDO_H * 2.8) + 'px';
+
+    bdoSetFace(bdoFront,  BDO_W, BDO_H, `translateZ(${BDO_D/2}px)`);
+    bdoSetFace(bdoBack,   BDO_W, BDO_H, `rotateY(180deg) translateZ(${BDO_D/2}px)`);
+    bdoSetFace(bdoSpineF, BDO_D, BDO_H, `rotateY(-90deg) translateZ(${BDO_W/2}px)`);
+    bdoSetFace(bdoPages,  BDO_D, BDO_H, `rotateY(90deg)  translateZ(${BDO_W/2}px)`);
+    bdoSetFace(bdoTop,    BDO_W, BDO_D, `rotateX(90deg)  translateZ(${BDO_H/2}px)`);
+    bdoSetFace(bdoBot,    BDO_W, BDO_D, `rotateX(-90deg) translateZ(${BDO_H/2}px)`);
+
+    bdoFront.style.background  = color;
+    bdoSpineF.style.background =
+      `linear-gradient(180deg, ${darken(color,35)} 0%, ${darken(color,18)} 40%, ${darken(color,28)} 100%)`;
+    bdoShadow.style.width = (BDO_W + BDO_D * 0.5) + 'px';
+
+    bdoRotX = -12; bdoRotY = 28;
+    bdoApplyRot();
+  }
+
+  /* ── drag rotation ── */
+  bdoScene.addEventListener('mousedown', e => {
+    bdoDrag = true; bdoLX = e.clientX; bdoLY = e.clientY;
+    bdoScene.classList.add('dragging'); e.preventDefault();
+  });
+  document.addEventListener('mousemove', e => {
+    if (!bdoDrag) return;
+    bdoRotY += (e.clientX - bdoLX) * 0.45;
+    bdoRotX -= (e.clientY - bdoLY) * 0.45;
+    bdoRotX  = Math.max(-75, Math.min(75, bdoRotX));
+    bdoLX = e.clientX; bdoLY = e.clientY;
+    bdoApplyRot();
+  });
+  document.addEventListener('mouseup', () => { bdoDrag = false; bdoScene.classList.remove('dragging'); });
 
   /* ── build grid ── */
   booksData.forEach(b => {
@@ -1418,26 +1484,10 @@ spineEl.addEventListener('mouseleave', () => {
     gridEl.appendChild(item);
   });
 
-  /* ── darken hex ── */
-  function darken(hex, amt) {
-    const n = parseInt(hex.slice(1), 16);
-    const r = Math.max(0, (n >> 16) - amt);
-    const g = Math.max(0, ((n >> 8) & 0xff) - amt);
-    const bl = Math.max(0, (n & 0xff) - amt);
-    return '#' + [r, g, bl].map(x => x.toString(16).padStart(2, '0')).join('');
-  }
-
   /* ── open detail ── */
   function openBook(b) {
-    /* 3-D cover sizing */
-    const maxH = 190;
-    const [w, h] = b.aspect;
-    const cH = maxH;
-    const cW = Math.round(maxH * w / h);
-    coverEl.style.cssText = `background:${b.color};width:${cW}px;height:${cH}px;`;
-    edgeEl.style.cssText  = `background:${darken(b.color, 45)};width:11px;height:${Math.round(cH * 0.96)}px;`;
+    buildBook3D(b.color, b.aspect[0], b.aspect[1]);
 
-    /* title + specs */
     titleEl.textContent = b.title;
     specList.innerHTML = [
       ['사이즈', b.size],
@@ -1454,7 +1504,7 @@ spineEl.addEventListener('mouseleave', () => {
     overlayEl.scrollTop = 0;
   }
 
-  /* ── close detail ── */
+  /* ── close ── */
   closeBtn.addEventListener('click', () => {
     overlayEl.classList.remove('active');
     wrapEl.classList.remove('blurred');
