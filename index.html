@@ -1723,8 +1723,8 @@ spineEl.addEventListener('mouseleave', () => {
 
   shadow.style.width = (IW + ID * 0.6) + 'px';
 
-  /* initial rotation — spine on the RIGHT so opening reads correctly */
-  let rotX = -12, rotY = -28;
+  /* initial rotation — spine on the LEFT (matches sketch) */
+  let rotX = -12, rotY = 28;
   book.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
 
   let startTime = null;
@@ -1735,19 +1735,19 @@ spineEl.addEventListener('mouseleave', () => {
     if (!startTime) startTime = ts;
     const elapsed = ts - startTime;
     if (elapsed < HOLD_MS) {
-      /* gentle sway: rotY -28 → -18 → -24 */
+      /* gentle sway: rotY 28 → 18 → 24 */
       const t = elapsed / HOLD_MS;
-      rotY = -28 + Math.sin(t * Math.PI) * 10;
+      rotY = 28 - Math.sin(t * Math.PI) * 10;
       book.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
       requestAnimationFrame(animRotate);
     } else {
-      /* Phase 2: settle face-on (slight left tilt so spine still readable) */
+      /* Phase 2: settle face-on */
       book.style.transition = 'transform 0.55s ease-out';
-      book.style.transform  = `rotateX(-8deg) rotateY(-5deg)`;
+      book.style.transform  = `rotateX(-8deg) rotateY(5deg)`;
 
       setTimeout(function(){
-        /* Phase 3: front cover swings open to the LEFT (outward, spine on right) */
-        front.style.transform = `translateZ(${ID/2}px) rotateY(-155deg)`;
+        /* Phase 3: cover swings BACKWARD around spine (left edge) — matches sketch */
+        front.style.transform = `rotateY(-155deg)`;
 
         setTimeout(function(){
           overlay.classList.add('gone');
