@@ -312,9 +312,11 @@
       display: flex;
       gap: 5px;
       align-items: flex-start;
+      width: 100%;
     }
     .books-col {
       flex: 1;
+      min-width: 0;
       display: flex;
       flex-direction: column;
       gap: 5px;
@@ -1524,8 +1526,7 @@ spineEl.addEventListener('mouseleave', () => {
   });
   document.addEventListener('mouseup', () => { bdoDrag = false; bdoScene.classList.remove('dragging'); });
 
-  /* ── build grid ── */
-  /* 5 column divs — all start at the same top */
+  /* ── build grid (infinite scroll masonry) ── */
   const NUM_COLS = 5;
   const colEls = Array.from({length: NUM_COLS}, () => {
     const c = document.createElement('div');
@@ -1534,19 +1535,36 @@ spineEl.addEventListener('mouseleave', () => {
     return c;
   });
   const colHeights = new Array(NUM_COLS).fill(0);
+  let bdataIdx = 0; /* cycles through booksData */
 
-  booksData.forEach(b => {
-    const item = document.createElement('div');
-    item.className = 'book-item';
-    const [w, h] = b.aspect;
-    item.innerHTML =
-      `<div class="bi-cover" style="background:${b.color};aspect-ratio:${w}/${h};"></div>` +
-      `<div class="bi-hover"><div class="bi-htitle">${b.title}</div><div class="bi-hsize">${b.size}</div></div>`;
-    item.addEventListener('click', () => openBook(b));
-    /* add to shortest column */
-    const minIdx = colHeights.indexOf(Math.min(...colHeights));
-    colEls[minIdx].appendChild(item);
-    colHeights[minIdx] += h / w; /* track relative height */
+  function addBatch(count) {
+    for (let i = 0; i < count; i++) {
+      const b = booksData[bdataIdx % booksData.length];
+      bdataIdx++;
+      const item = document.createElement('div');
+      item.className = 'book-item';
+      const [w, h] = b.aspect;
+      item.innerHTML =
+        `<div class="bi-cover" style="background:${b.color};aspect-ratio:${w}/${h};"></div>` +
+        `<div class="bi-hover"><div class="bi-htitle">${b.title}</div><div class="bi-hsize">${b.size}</div></div>`;
+      item.addEventListener('click', () => openBook(b));
+      const minIdx = colHeights.indexOf(Math.min(...colHeights));
+      colEls[minIdx].appendChild(item);
+      colHeights[minIdx] += h / w;
+    }
+  }
+
+  addBatch(50); /* initial load */
+
+  /* infinite scroll: add more when near the bottom */
+  let isAdding = false;
+  wrapEl.addEventListener('scroll', () => {
+    if (isAdding) return;
+    if (wrapEl.scrollTop + wrapEl.clientHeight >= wrapEl.scrollHeight - 200) {
+      isAdding = true;
+      addBatch(30);
+      isAdding = false;
+    }
   });
 
   /* ── open detail ── */
