@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About — Three Idiots Paper Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-main:  'Noto Sans KR', sans-serif;
+      --cream:      #F5F5F5;
+      --cream-dark: #ECECEC;
+      --brown:      #1A1A1A;
+      --brown-mid:  #555555;
+      --accent:     #444444;
+      --accent-lt:  #999999;
+      --muted:      #888888;
+      --border:     rgba(0,0,0,.13);
+    }
+
+    html, body { height: 100%; background: #0F0F0F; font-family: var(--font-main); }
+
+    /* ── BOOK LAYOUT ──────────────────────────────── */
+    .book {
+      display: grid;
+      grid-template-columns: 1fr 48px 1fr;
+      grid-template-areas: "left spine right";
+      height: 100vh; width: 100vw;
+      transition: grid-template-columns 0.3s ease;
+    }
+    .book.spine-open { grid-template-columns: 1fr 160px 1fr; }
+
+    /* ── SPINE ────────────────────────────────────── */
+    .spine {
+      grid-area: spine;
+      background: linear-gradient(180deg, #141414 0%, var(--brown) 15%, #222 85%, #141414 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 28px;
+      padding: 22vh 0 2px; position: relative; z-index: 20;
+      overflow: hidden; cursor: default;
+      box-shadow: -10px 0 28px rgba(0,0,0,.55), 10px 0 28px rgba(0,0,0,.55),
+                  inset 3px 0 10px rgba(255,255,255,.04), inset -3px 0 10px rgba(0,0,0,.35);
+    }
+    .spine::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.06) 3px, rgba(0,0,0,.06) 4px);
+    }
+    .spine-brand {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      writing-mode: vertical-rl; font-family: var(--font-main);
+      font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent-lt); opacity: .85; user-select: none; white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .spine.spine-open .spine-brand { opacity: 0; pointer-events: none; }
+    .spine-logo {
+      position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+      height: 88px; width: auto;
+      filter: invert(1) brightness(1.6) sepia(0.1);
+      mix-blend-mode: lighten;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .spine.spine-open .spine-logo { opacity: 1; pointer-events: auto; }
+    .spine.spine-open { padding: 2px 0; }
+    .spine-nav { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%; }
+    .spine-nav a {
+      font-family: var(--font-main); font-size: 10.5px; letter-spacing: 2.5px;
+      color: rgba(245,245,245,.65); text-decoration: none; white-space: nowrap;
+      writing-mode: vertical-rl; transition: color .25s; padding: 0 4px;
+    }
+    .spine-nav a.active { color: var(--accent-lt); }
+    .spine-nav a:hover  { color: var(--accent-lt); }
+    .spine.spine-open .spine-nav { align-items: flex-start; padding: 0 20px; gap: 6px; }
+    .spine.spine-open .spine-nav a {
+      writing-mode: horizontal-tb; font-size: 11.5px; letter-spacing: 1.5px;
+      padding: 7px 10px; width: 100%; border-radius: 2px;
+    }
+    .spine.spine-open .spine-nav a:hover { background: rgba(245,245,245,.07); }
+    .spine-deco {
+      font-family: var(--font-main); font-size: 14px;
+      color: rgba(153,153,153,.35); user-select: none; transition: opacity .2s;
+    }
+    .spine.spine-open .spine-deco { opacity: 0; }
+
+    /* ── LEFT PAGE ────────────────────────────────── */
+    .page-left {
+      grid-area: left; background: var(--cream);
+      overflow-y: auto; overflow-x: hidden; position: relative;
+      box-shadow: inset -16px 0 32px -8px rgba(0,0,0,.13);
+    }
+    .page-left::-webkit-scrollbar { width: 3px; }
+    .page-left::-webkit-scrollbar-thumb { background: rgba(100,100,100,.35); border-radius: 2px; }
+
+    /* ── PAGE HEADER ──────────────────────────────── */
+    .page-header {
+      position: sticky; top: 0; z-index: 10; background: var(--cream);
+      display: flex; align-items: center; gap: 14px;
+      padding: 2px 36px; border-bottom: 1px solid var(--border);
+    }
+    .page-header a { display: block; line-height: 0; flex-shrink: 0; }
+    .header-page-name {
+      margin-left: auto; font-family: var(--font-main); font-size: 10px;
+      font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--accent);
+    }
+
+    /* ── ABOUT BODY ───────────────────────────────── */
+    .about-body { padding: 0 0 80px; }
+
+    /* Section tag */
+    .section-tag {
+      font-family: var(--font-main); font-size: 9px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-tag::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── THREE IDIOTS SECTION ─────────────────────── */
+    .idiots-section { padding: 32px 36px 0; overflow: hidden; }
+
+    .idiots-intro { margin-bottom: 0; }
+    .idiots-heading {
+      font-family: var(--font-main); font-size: 28px; font-weight: 700;
+      color: var(--brown); letter-spacing: -0.5px; line-height: 1;
+      margin-bottom: 16px; margin-top: 18px;
+    }
+    .idiots-desc {
+      font-family: var(--font-main); font-size: 12.5px; font-weight: 300;
+      color: var(--brown-mid); line-height: 1.85; letter-spacing: .2px;
+    }
+
+    /* Photo floats right, top aligned with the heading */
+    .team-photo {
+      float: right;
+      width: 240px;
+      margin: 18px 0 20px 28px;
+      flex-shrink: 0;
+    }
+    .team-photo img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ── MEMBER TABLE ─────────────────────────────── */
+    .member-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: transparent;
+      font-family: var(--font-main);
+      table-layout: fixed;
+    }
+    .member-table thead tr { border-bottom: 1.5px solid var(--border); }
+    .member-table th {
+      font-size: 8px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--muted);
+      padding: 0 0 10px; text-align: left;
+    }
+    .member-table th:first-child { width: 30%; }
+    .member-table th:nth-child(2) { width: 24%; }
+    .member-table th:last-child  { width: 46%; }
+    .member-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .member-table tbody tr:last-child { border-bottom: none; }
+    .member-table td {
+      padding: 13px 0; font-size: 11.5px; font-weight: 300;
+      color: var(--brown-mid); line-height: 1.6; vertical-align: top;
+    }
+    .member-table .role-label {
+      font-weight: 700; color: var(--brown);
+      font-size: 11px; letter-spacing: .2px;
+    }
+    .member-table .role-tag {
+      display: block; font-size: 7.5px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent-lt); margin-top: 3px;
+    }
+
+    /* Section divider */
+    .section-divider {
+      margin: 36px 36px 0;
+      border: none; border-top: 1px solid var(--border);
+    }
+
+    /* ── PRINT SHOP SECTION ───────────────────────── */
+    .shop-section { padding: 32px 36px 0; }
+
+    .shop-heading-block { margin: 20px 0 36px; }
+    .shop-name {
+      font-family: var(--font-main); font-size: 13.5px; font-weight: 700;
+      letter-spacing: 3px; color: var(--brown); margin-bottom: 10px;
+    }
+    .shop-tagline {
+      font-family: var(--font-main); font-size: 22px; font-weight: 700;
+      color: var(--brown); line-height: 1.4; letter-spacing: -0.3px;
+    }
+
+    /* ── SERVICE FEATURED + KEYWORD REEL ────────────── */
+    .svc-featured {
+      display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-main); font-size: 24px; font-weight: 700;
+      color: var(--brown); letter-spacing: 1px;
+      padding: 9px 0; margin: 0 auto; width: fit-content;
+    }
+    .svc-paren {
+      font-weight: 300; color: var(--brown-mid); font-size: 26px; line-height: 1;
+      display: inline-flex; align-items: center;
+      height: 7.2em; vertical-align: middle;
+    }
+    /* 괄호 안 릴 창 — 4줄 가시 영역 */
+    .svc-slot-outer {
+      display: inline-block;
+      overflow: hidden;
+      width: 160px;
+      height: 7.2em;         /* 4줄 × 1.8em 행간 */
+      vertical-align: middle;
+      text-align: center;
+      /* 위아래 그라데이션 — 중앙 40%만 선명하게 */
+      -webkit-mask-image: linear-gradient(to bottom,
+        transparent 0%, black 22%, black 78%, transparent 100%);
+      mask-image: linear-gradient(to bottom,
+        transparent 0%, black 22%, black 78%, transparent 100%);
+    }
+    .svc-slot-reel {
+      display: flex; flex-direction: column; align-items: center;
+      /* duration은 JS로 주입 */
+    }
+    .svc-slot-reel span {
+      display: flex; align-items: center; justify-content: center;
+      height: 1.8em; white-space: nowrap; /* 기존 1.25em → 1.8em 행간 */
+      font-weight: 700; color: var(--brown);
+    }
+
+    /* ── RIGHT PAGE — Branding ────────────────────── */
+    .page-right {
+      grid-area: right;
+      background: #080808;
+      position: relative;
+      display: flex;
+      overflow: hidden;
+    }
+    .brand-panel {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; padding: 40px;
+    }
+    .brand-panel::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .4;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    }
+    .brand-panel::after {
+      content: '';
+      position: absolute; bottom: 32px; right: 32px;
+      width: 36px; height: 36px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-right: 1px solid rgba(255,255,255,.08);
+      pointer-events: none;
+    }
+    .brand-content { position: relative; z-index: 1; text-align: center; }
+    .brand-eyebrow {
+      font-family: var(--font-main); font-size: 8px; font-weight: 700;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: rgba(255,255,255,.22); margin-bottom: 22px;
+    }
+    .brand-name {
+      font-family: var(--font-main); font-size: 28px; font-weight: 700;
+      letter-spacing: 6px; text-transform: uppercase;
+      color: rgba(255,255,255,.88); line-height: 1;
+      margin-bottom: 10px;
+    }
+    .brand-sub {
+      font-family: var(--font-main); font-size: 9px; font-weight: 300;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: rgba(255,255,255,.28);
+    }
+    .brand-rule {
+      width: 32px; height: 1px;
+      background: rgba(255,255,255,.15);
+      margin: 24px auto;
+    }
+    .brand-tagline {
+      font-family: var(--font-main); font-size: 11px; font-weight: 300;
+      color: rgba(255,255,255,.28); letter-spacing: 1.5px;
+      line-height: 1.7;
+    }
+    .brand-est {
+      position: absolute; top: 28px; left: 36px;
+      font-family: var(--font-main); font-size: 8px; font-weight: 300;
+      letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.14);
+    }
+
+    /* ── MOBILE ───────────────────────────────────── */
+    @media (max-width: 768px) {
+      html, body { overflow: auto; }
+      .book {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: 48px auto auto;
+        grid-template-areas: "spine" "left" "right";
+        height: auto; min-height: 100vh; transition: none;
+      }
+      .spine { flex-direction: row; padding: 0 20px; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,.45); }
+      .spine::before { background-image: none; }
+      .spine-brand, .spine.spine-open .spine-brand { writing-mode: horizontal-tb; opacity: 1; font-size: 11px; pointer-events: auto; }
+      .spine-nav, .spine.spine-open .spine-nav { flex-direction: row; gap: 16px; padding: 0; align-items: center; width: auto; }
+      .spine-nav a, .spine.spine-open .spine-nav a { writing-mode: horizontal-tb; font-size: 11px; letter-spacing: 1.5px; width: auto; padding: 0; }
+      .spine-nav a:hover, .spine.spine-open .spine-nav a:hover { background: none; }
+      .spine-deco, .spine.spine-open .spine-deco { display: none; }
+      .page-left { box-shadow: none; }
+      .about-body { padding-bottom: 40px; }
+      .idiots-section, .shop-section { padding-left: 24px; padding-right: 24px; }
+      .section-divider { margin-left: 24px; margin-right: 24px; }
+      .page-header { padding: 16px 24px 14px; }
+      .team-photo { width: 180px; }
+      .page-right { min-height: 300px; }
+      .brand-name { font-size: 22px; letter-spacing: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="book" id="book">
+
+  <!-- ═══ LEFT PAGE ════════════════════════════════════════════════ -->
+  <div class="page-left">
+
+    <header class="page-header">
+      <a href="index.html">
+        <img class="logo-img" src="LOGO.png" alt="THREE Idiots Paper Service"
+             style="height:88px;width:auto;display:block;mix-blend-mode:multiply;">
+      </a>
+      <span class="header-page-name">About</span>
+    </header>
+
+    <div class="about-body">
+
+      <!-- ── §01 Three Idiots ── -->
+      <div class="idiots-section">
+        <div class="section-tag">01 &nbsp; Three Idiots</div>
+
+        <!-- Photo floats right, top-aligned with heading -->
+        <div class="team-photo">
+          <img src="about/시퀀스 01.00_00_50_06.스틸 002 1.png" alt="Three Idiots">
+        </div>
+
+        <div class="idiots-intro">
+          <h2 class="idiots-heading">Three Idiots</h2>
+          <p class="idiots-desc">
+            세상에 완벽한 정답만 가득하다면 얼마나 지루할까요?<br>
+            여기, 남들이 "왜?"라고 물을 때 "왜 안 돼?"라고 되묻는<br>
+            세 명의 얼간이가 뭉쳤습니다.
+          </p>
+          <p class="idiots-desc" style="margin-top:1.2em;">
+            점점 무던해지는 세상에 던지는 기본 좋은 놀람이자,<br>
+            엉뚱한 상상을 현실로 만드는 크리에이터팀 입니다.
+          </p>
+        </div>
+
+        <!-- Member table (flows below the float) -->
+        <div style="clear:both; margin-top: 28px;">
+          <table class="member-table">
+            <thead>
+              <tr>
+                <th>멤버</th>
+                <th>역할</th>
+                <th>특징</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <div class="role-label">브레인 얼간이</div>
+                  <div class="role-tag">Brain</div>
+                </td>
+                <td>기획 및 전략</td>
+                <td>겉으로 멀쩡해 보이지만 가장 엉뚱한 아이디어 뱅크</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="role-label">행동파 얼간이</div>
+                  <div class="role-tag">Maker</div>
+                </td>
+                <td>실행 및 제작</td>
+                <td>일단 저지르고 보는 스타일, 추진력만큼은 NASA급</td>
+              </tr>
+              <tr>
+                <td>
+                  <div class="role-label">분위기 얼간이</div>
+                  <div class="role-tag">Vibe</div>
+                </td>
+                <td>홍보 및 소통</td>
+                <td>웃음소리만으로 주변을 정복하는 인간 비타민</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div><!-- /idiots-section -->
+
+
+      <!-- ── §02 인쇄소 설명 ── -->
+      <div class="shop-section">
+        <div class="section-tag">02 &nbsp; 인쇄소 설명</div>
+
+        <div class="shop-heading-block">
+          <p class="shop-name">THREE IDIOTS PAPER SERVICE</p>
+          <p class="shop-tagline">새롭고 기상천외한 것들을<br>만듭니다.</p>
+        </div>
+
+        <!-- 기상천외한 ( ) 고정 · 괄호 안 키워드만 릴 스크롤 -->
+        <div class="svc-featured">
+          기상천외한&thinsp;<span class="svc-paren">(</span>&thinsp;<span
+            class="svc-slot-outer"><span class="svc-slot-reel" id="svcSlotReel">
+              <!-- Set A -->
+              <span>Binding</span><span>Books</span><span>Posters</span>
+              <span>Stickers</span><span>Zines</span><span>Flyers</span>
+              <span>Cards</span><span>Prints</span><span>Banners</span>
+              <span>Notebooks</span><span>Labels</span><span>Stamps</span>
+              <span>Invites</span><span>Tickets</span><span>Riso</span>
+              <span>Magazines</span><span>Leaflets</span><span>Patches</span>
+              <!-- Set B (middle — snapping target) -->
+              <span>Binding</span><span>Books</span><span>Posters</span>
+              <span>Stickers</span><span>Zines</span><span>Flyers</span>
+              <span>Cards</span><span>Prints</span><span>Banners</span>
+              <span>Notebooks</span><span>Labels</span><span>Stamps</span>
+              <span>Invites</span><span>Tickets</span><span>Riso</span>
+              <span>Magazines</span><span>Leaflets</span><span>Patches</span>
+              <!-- Set C -->
+              <span>Binding</span><span>Books</span><span>Posters</span>
+              <span>Stickers</span><span>Zines</span><span>Flyers</span>
+              <span>Cards</span><span>Prints</span><span>Banners</span>
+              <span>Notebooks</span><span>Labels</span><span>Stamps</span>
+              <span>Invites</span><span>Tickets</span><span>Riso</span>
+              <span>Magazines</span><span>Leaflets</span><span>Patches</span>
+            </span></span>&thinsp;<span class="svc-paren">)</span>
+        </div>
+      </div><!-- /shop-section -->
+
+    </div><!-- /about-body -->
+  </div><!-- /page-left -->
+
+
+  <!-- ═══ SPINE ══════════════════════════════════════════════════ -->
+  <nav class="spine" id="spine">
+    <div class="spine-brand">Three Idiots Paper Service</div>
+    <img class="spine-logo logo-img" src="LOGO.png" alt="THREE Idiots Printing Room">
+    <div class="spine-nav">
+      <a href="about.html" class="active">About</a>
+      <a href="order.html">Order</a>
+      <a href="index.html">Program</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="spine-deco">✦</div>
+  </nav>
+
+
+  <!-- ═══ RIGHT PAGE — Branding ════════════════════════════════ -->
+  <div class="page-right">
+    <div class="brand-panel">
+      <div class="brand-est">Est. 2026</div>
+      <div class="brand-content">
+        <div class="brand-eyebrow">Seoul · Korea</div>
+        <div class="brand-name">Three<br>Idiots</div>
+        <div class="brand-sub">Paper Service</div>
+        <div class="brand-rule"></div>
+        <div class="brand-tagline">
+          새롭고 기상천외한 것들을<br>만듭니다.
+        </div>
+      </div>
+    </div>
+  </div><!-- /page-right -->
+
+</div><!-- /book -->
+
+
+<script>
+/* ════════════════════════════════════════════
+   SPINE HOVER EXPAND
+════════════════════════════════════════════ */
+const spineEl = document.getElementById('spine');
+const bookEl  = document.getElementById('book');
+const isMob   = () => window.innerWidth <= 768;
+
+spineEl.addEventListener('mouseenter', () => {
+  if (isMob()) return;
+  spineEl.classList.add('spine-open');
+  bookEl.classList.add('spine-open');
+});
+spineEl.addEventListener('mouseleave', () => {
+  spineEl.classList.remove('spine-open');
+  bookEl.classList.remove('spine-open');
+});
+
+/* ════════════════════════════════════════════
+   SLOT MACHINE — 카지노 슬롯 스타일
+   빠르게 돌다가 탁 멈추고 → 대기 → 반복
+════════════════════════════════════════════ */
+(function initSlotMachine() {
+  const reel = document.getElementById('svcSlotReel');
+  if (!reel) return;
+
+  document.fonts.ready.then(() => {
+    const spans    = Array.from(reel.children);
+    const third    = spans.length / 3;              /* 18 unique items (3 sets: A B C) */
+    const itemH    = spans[0].getBoundingClientRect().height;
+    const slotH    = reel.parentElement.getBoundingClientRect().height;
+    const fullSetH = itemH * third;
+
+    /* Center item i of set B (middle set; physical index = third + i).
+       Items from set A are visible above, set C below — true infinite loop. */
+    const yFor = i => slotH / 2 - (third + i + 0.5) * itemH;
+
+    /* Fast-spin: scroll one full set (B[0] → C[0]), seamless since C === A === B */
+    const kfEl = document.createElement('style');
+    kfEl.textContent = `
+      @keyframes slot-fast {
+        from { transform: translateY(${yFor(0)}px); }
+        to   { transform: translateY(${yFor(0) - fullSetH}px); }
+      }
+    `;
+    document.head.appendChild(kfEl);
+
+    let cur   = 0;
+    let timer = null;
+
+    /* Instantly park reel at set-B item i */
+    function snapInstant(i) {
+      reel.style.animation  = 'none';
+      reel.style.transition = 'none';
+      reel.style.filter     = '';
+      void reel.offsetWidth;
+      reel.style.transform  = `translateY(${yFor(i)}px)`;
+    }
+
+    /* Start fast blur-spin */
+    function startSpin() {
+      reel.style.transition = 'none';
+      reel.style.animation  = 'none';
+      void reel.offsetWidth;
+      reel.style.filter     = 'blur(2.5px)';
+      reel.style.animation  = 'slot-fast 0.13s linear infinite';
+    }
+
+    /* Capture live animation position, then ease-snap to set-B item i */
+    function stopAt(i, cb) {
+      const liveMatrix     = getComputedStyle(reel).transform;
+      reel.style.animation = 'none';
+      reel.style.filter    = '';
+      reel.style.transform = liveMatrix;
+      void reel.offsetWidth;
+      reel.style.transition = 'transform 0.2s cubic-bezier(0.05, 0.9, 0.2, 1)';
+      reel.style.transform  = `translateY(${yFor(i)}px)`;
+      reel.addEventListener('transitionend', function h() {
+        reel.removeEventListener('transitionend', h);
+        cb && cb();
+      });
+    }
+
+    /* Main cycle: spin → snap → pause → repeat */
+    function cycle() {
+      let next;
+      do { next = Math.floor(Math.random() * third); } while (next === cur);
+      const spinMs  = 650 + Math.random() * 400;
+      const pauseMs = 700 + Math.random() * 600;
+
+      startSpin();
+      timer = setTimeout(() => {
+        stopAt(next, () => {
+          cur = next;
+          timer = setTimeout(cycle, pauseMs);
+        });
+      }, spinMs);
+    }
+
+    snapInstant(0);
+    timer = setTimeout(cycle, 900);
+  });
+})();
+
+/* ════════════════════════════════════════════
+   LOGO BACKGROUND REMOVAL (Canvas API)
+════════════════════════════════════════════ */
+(function stripLogoBackground() {
+  const imgs = document.querySelectorAll('.logo-img');
+  if (!imgs.length) return;
+  const src = new Image();
+  src.onload = function () {
+    const c = document.createElement('canvas');
+    c.width = src.naturalWidth; c.height = src.naturalHeight;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(src, 0, 0);
+    try {
+      const d = ctx.getImageData(0, 0, c.width, c.height);
+      for (let i = 0; i < d.data.length; i += 4) {
+        const avg = (d.data[i] + d.data[i+1] + d.data[i+2]) / 3;
+        if (avg > 210) d.data[i+3] = 0;
+        else if (avg > 150) d.data[i+3] = Math.round((210 - avg) / 60 * 255);
+      }
+      ctx.putImageData(d, 0, 0);
+      const url = c.toDataURL('image/png');
+      imgs.forEach(el => { el.src = url; });
+    } catch (e) {
+      imgs.forEach(el => {
+        if (!el.classList.contains('spine-logo')) el.style.mixBlendMode = 'multiply';
+      });
+    }
+  };
+  src.onerror = function () {
+    imgs.forEach(el => {
+      if (!el.classList.contains('spine-logo')) el.style.mixBlendMode = 'multiply';
+    });
+  };
+  src.src = 'LOGO.png';
+})();
+
+
+</script>
+</body>
+</html>

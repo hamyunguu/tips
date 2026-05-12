@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Three Idiots Paper Service</title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --font-main:  'Noto Sans KR', sans-serif;
+      --cream:      #F5F5F5;
+      --cream-dark: #ECECEC;
+      --brown:      #1A1A1A;
+      --brown-mid:  #555555;
+      --accent:     #444444;
+      --accent-lt:  #999999;
+      --muted:      #888888;
+      --border:     rgba(0,0,0,.13);
+      --red:        #CC2E1C;
+    }
+
+    html, body { height: 100%; background: #0F0F0F; font-family: var(--font-main); }
+
+    /* ── BOOK LAYOUT ──────────────────────────────── */
+    .book {
+      display: grid;
+      grid-template-columns: 1fr 48px 1fr;
+      grid-template-areas: "left spine right";
+      height: 100vh; width: 100vw;
+      transition: grid-template-columns 0.3s ease;
+    }
+    .book.spine-open { grid-template-columns: 1fr 160px 1fr; }
+
+    /* ── SPINE ────────────────────────────────────── */
+    .spine {
+      grid-area: spine;
+      background: linear-gradient(180deg, #141414 0%, var(--brown) 15%, #222 85%, #141414 100%);
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 28px;
+      padding: 22vh 0 2px; position: relative; z-index: 20;
+      overflow: hidden; cursor: default;
+      box-shadow: -10px 0 28px rgba(0,0,0,.55), 10px 0 28px rgba(0,0,0,.55),
+                  inset 3px 0 10px rgba(255,255,255,.04), inset -3px 0 10px rgba(0,0,0,.35);
+    }
+    .spine::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none;
+      background-image: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.06) 3px, rgba(0,0,0,.06) 4px);
+    }
+    .spine-brand {
+      position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+      writing-mode: vertical-rl; font-family: var(--font-main);
+      font-size: 10px; font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+      color: var(--accent-lt); opacity: .85; user-select: none; white-space: nowrap;
+      transition: opacity 0.2s;
+    }
+    .spine.spine-open .spine-brand { opacity: 0; pointer-events: none; }
+    .spine-logo {
+      position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+      height: 88px; width: auto;
+      filter: invert(1) brightness(1.6) sepia(0.1);
+      mix-blend-mode: lighten;
+      opacity: 0; pointer-events: none; transition: opacity 0.2s;
+    }
+    .spine.spine-open .spine-logo { opacity: 1; pointer-events: auto; }
+    .spine.spine-open { padding: 2px 0; }
+    .spine-nav { display: flex; flex-direction: column; gap: 20px; align-items: center; width: 100%; }
+    .spine-nav a {
+      font-family: var(--font-main); font-size: 10.5px; letter-spacing: 2.5px;
+      color: rgba(245,245,245,.65); text-decoration: none; white-space: nowrap;
+      writing-mode: vertical-rl; transition: color .25s; padding: 0 4px;
+    }
+    .spine-nav a.active { color: var(--accent-lt); }
+    .spine-nav a:hover  { color: var(--accent-lt); }
+    .spine.spine-open .spine-nav { align-items: flex-start; padding: 0 20px; gap: 6px; }
+    .spine.spine-open .spine-nav a {
+      writing-mode: horizontal-tb; font-size: 11.5px; letter-spacing: 1.5px;
+      padding: 7px 10px; width: 100%; border-radius: 2px;
+    }
+    .spine.spine-open .spine-nav a:hover { background: rgba(245,245,245,.07); }
+    .spine-deco {
+      font-family: var(--font-main); font-size: 14px;
+      color: rgba(153,153,153,.35); user-select: none; transition: opacity .2s;
+    }
+    .spine.spine-open .spine-deco { opacity: 0; }
+
+    /* ── LEFT PAGE ────────────────────────────────── */
+    .page-left {
+      grid-area: left; background: var(--cream);
+      overflow-y: auto; overflow-x: hidden; position: relative;
+      box-shadow: inset -16px 0 32px -8px rgba(0,0,0,.13);
+    }
+    .page-left::-webkit-scrollbar { width: 3px; }
+    .page-left::-webkit-scrollbar-thumb { background: rgba(100,100,100,.35); border-radius: 2px; }
+
+    /* ── PAGE HEADER ──────────────────────────────── */
+    .page-header {
+      position: sticky; top: 0; z-index: 10; background: var(--cream);
+      display: flex; align-items: center; gap: 14px;
+      padding: 2px 36px; border-bottom: 1px solid var(--border);
+    }
+    .page-header a { display: block; line-height: 0; flex-shrink: 0; }
+    .header-page-name {
+      margin-left: auto; font-family: var(--font-main); font-size: 10px;
+      font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--accent);
+    }
+
+    /* ── HERO SLIDER ─────────────────────────────── */
+    .hero { position: relative; width: 100%; height: 310px; overflow: hidden; }
+    .slide { position: absolute; inset: 0; opacity: 0; transition: opacity .9s ease; }
+    .slide.active { opacity: 1; }
+    .slide-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .slide-grain {
+      position: absolute; inset: 0; pointer-events: none; mix-blend-mode: overlay;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    }
+    .slide-rule { position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(to right, transparent, var(--accent), transparent); opacity: .5; }
+    .slide-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(to top, rgba(0,0,0,.88) 0%, rgba(0,0,0,.36) 45%, rgba(0,0,0,.08) 100%);
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 28px 36px;
+    }
+    .slide-tag { font-family: var(--font-main); font-size: 9.5px; letter-spacing: 4px; text-transform: uppercase; color: var(--accent-lt); margin-bottom: 9px; font-weight: 500; }
+    .slide-title { font-family: var(--font-main); font-size: 25px; font-weight: 700; color: var(--cream); line-height: 1.35; margin-bottom: 7px; }
+    .slide-desc { font-family: var(--font-main); font-size: 11.5px; color: rgba(245,245,245,.68); font-weight: 300; letter-spacing: .3px; }
+    .slider-dots { position: absolute; bottom: 18px; right: 36px; display: flex; gap: 7px; z-index: 5; }
+    .dot { width: 6px; height: 6px; border-radius: 3px; background: rgba(245,245,245,.35); cursor: pointer; transition: all .3s; }
+    .dot.active { width: 22px; background: var(--accent-lt); }
+    .slide-counter { position: absolute; top: 16px; right: 36px; font-family: var(--font-main); font-size: 11px; font-weight: 300; color: rgba(245,245,245,.5); z-index: 5; letter-spacing: 2px; }
+
+    /* ── PROGRAMS ─────────────────────────────────── */
+    .programs { padding: 28px 36px 36px; }
+    .sec-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+    .sec-title { font-family: var(--font-main); font-size: 15px; font-weight: 700; color: var(--brown); white-space: nowrap; letter-spacing: .5px; }
+    .sec-rule { flex: 1; height: 1px; background: linear-gradient(to right, rgba(0,0,0,.2), transparent); }
+    .sec-date { font-family: var(--font-main); font-size: 9.5px; letter-spacing: 2.5px; color: var(--muted); font-weight: 300; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    .card { background: #fff; overflow: hidden; cursor: pointer; transition: transform .25s ease, box-shadow .25s ease; box-shadow: 0 2px 10px rgba(0,0,0,.1), 0 1px 3px rgba(0,0,0,.07); }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 16px 32px rgba(0,0,0,.18), 0 4px 8px rgba(0,0,0,.1); }
+    .card-img { width: 100%; aspect-ratio: 4/3; position: relative; }
+    .card-img-bg { position: absolute; inset: 0; background-size: cover; background-position: center; }
+    .card-badge { position: absolute; top: 8px; left: 8px; background: var(--brown); color: var(--accent-lt); font-family: var(--font-main); font-size: 8.5px; letter-spacing: 1.5px; padding: 3px 8px; font-weight: 500; }
+    .card-badge.sold { background: rgba(0,0,0,.5); color: rgba(245,245,245,.6); }
+    .card-body { padding: 13px 14px 14px; }
+    .card-title { font-family: var(--font-main); font-size: 12px; font-weight: 700; color: var(--brown); line-height: 1.5; margin-bottom: 8px; }
+    .card-foot { display: flex; justify-content: space-between; align-items: center; }
+    .card-date { font-family: var(--font-main); font-size: 9.5px; color: var(--muted); font-weight: 300; }
+    .card-price { font-family: var(--font-main); font-size: 12.5px; font-weight: 700; color: var(--accent); }
+
+    /* ── ABOUT BODY ───────────────────────────────── */
+    .about-body { padding: 0 0 64px; }
+
+    /* Section tag (matches order.html form-section-title) */
+    .section-tag {
+      font-family: var(--font-main); font-size: 9px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--muted);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .section-tag::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── THREE IDIOTS SECTION ─────────────────────── */
+    .idiots-section { padding: 32px 36px 0; overflow: hidden; /* contain float */ }
+
+    .idiots-intro { margin-bottom: 0; }
+    .idiots-heading {
+      font-family: var(--font-main); font-size: 28px; font-weight: 700;
+      color: var(--brown); letter-spacing: -0.5px; line-height: 1;
+      margin-bottom: 16px; margin-top: 18px;
+    }
+    .idiots-desc {
+      font-family: var(--font-main); font-size: 12.5px; font-weight: 300;
+      color: var(--brown-mid); line-height: 1.85; letter-spacing: .2px;
+    }
+
+    /* Photo floats right, top aligned with the heading */
+    .team-photo {
+      float: right;
+      width: 240px;
+      margin: 18px 0 20px 28px; /* 18px matches heading's margin-top */
+      flex-shrink: 0;
+    }
+    .team-photo img {
+      width: 100%;
+      height: auto;        /* natural aspect ratio */
+      display: block;
+    }
+
+    /* ── MEMBER TABLE — light, site-consistent ────── */
+    .member-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: transparent;
+      font-family: var(--font-main);
+      table-layout: fixed;
+    }
+    /* Header row: thin bottom rule, same as form-section-title style */
+    .member-table thead tr {
+      border-bottom: 1.5px solid var(--border);
+    }
+    .member-table th {
+      font-size: 8px; font-weight: 700; letter-spacing: 3px;
+      text-transform: uppercase; color: var(--muted);
+      padding: 0 0 10px; text-align: left;
+    }
+    .member-table th:first-child { width: 30%; }
+    .member-table th:nth-child(2) { width: 24%; }
+    .member-table th:last-child  { width: 46%; }
+    /* Body rows */
+    .member-table tbody tr {
+      border-bottom: 1px solid var(--border);
+      transition: background .15s;
+    }
+    .member-table tbody tr:last-child { border-bottom: none; }
+    .member-table tbody tr:hover { background: rgba(0,0,0,.025); }
+    .member-table td {
+      padding: 13px 0; font-size: 11.5px; font-weight: 300;
+      color: var(--brown-mid); line-height: 1.6; vertical-align: top;
+    }
+    .member-table .role-label {
+      font-weight: 700; color: var(--brown);
+      font-size: 11px; letter-spacing: .2px;
+    }
+    .member-table .role-tag {
+      display: block; font-size: 7.5px; font-weight: 700;
+      letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent-lt); margin-top: 3px;
+    }
+
+    /* Section divider */
+    .section-divider {
+      margin: 36px 36px 0;
+      border: none; border-top: 1px solid var(--border);
+    }
+
+    /* ── PRINT SHOP SECTION ───────────────────────── */
+    .shop-section { padding: 32px 36px 0; }
+
+    .shop-heading-block { margin: 20px 0 36px; }
+    .shop-name {
+      font-family: var(--font-main); font-size: 13.5px; font-weight: 700;
+      letter-spacing: 3px; color: var(--brown); margin-bottom: 10px;
+    }
+    .shop-tagline {
+      font-family: var(--font-main); font-size: 22px; font-weight: 700;
+      color: var(--brown); line-height: 1.4; letter-spacing: -0.3px;
+    }
+
+    /* ── SERVICE LIST + KEYWORD SLOT ─────────────── */
+    .service-list {
+      display: flex; flex-direction: column;
+      align-items: center;   /* 전체 중앙 정렬 */
+      gap: 0; padding: 8px 0 0;
+    }
+    .svc-item {
+      font-family: var(--font-main); font-size: 15px; font-weight: 300;
+      letter-spacing: 2px; color: rgba(0,0,0,.22);
+      line-height: 1; padding: 10px 0; user-select: none;
+    }
+    /* 고정 라인: "기상천외한 ( [slot] )" */
+    .svc-featured {
+      display: flex; align-items: center;
+      font-family: var(--font-main); font-size: 16px; font-weight: 700;
+      color: var(--brown); letter-spacing: 1px;
+      padding: 10px 0;
+    }
+    .svc-paren {
+      font-weight: 300; color: var(--brown-mid); font-size: 18px; line-height: 1;
+    }
+    /* 키워드가 위로 롤링되는 창 */
+    .svc-slot-wrap {
+      display: inline-block;
+      overflow: hidden;
+      height: 1.2em; line-height: 1.2;
+      vertical-align: bottom;
+      min-width: 86px;
+      text-align: center;
+    }
+    .svc-slot {
+      display: block;
+      font-weight: 700; color: var(--brown);
+    }
+
+    /* ── RIGHT PAGE — Branding ────────────────────── */
+    .page-right {
+      grid-area: right;
+      background: #080808;
+      position: relative;
+      display: flex;
+      overflow: hidden;
+    }
+    /* Dark branding panel — full width of right page */
+    .brand-panel {
+      flex: 1;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      position: relative; padding: 40px;
+    }
+    /* Subtle grain */
+    .brand-panel::before {
+      content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .4;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.08'/%3E%3C/svg%3E");
+    }
+    /* Corner bracket decoration */
+    .brand-panel::after {
+      content: '';
+      position: absolute; bottom: 32px; right: 32px;
+      width: 36px; height: 36px;
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-right: 1px solid rgba(255,255,255,.08);
+      pointer-events: none;
+    }
+
+    .brand-content { position: relative; z-index: 1; text-align: center; }
+    .brand-eyebrow {
+      font-family: var(--font-main); font-size: 8px; font-weight: 700;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: rgba(255,255,255,.22); margin-bottom: 22px;
+    }
+    .brand-name {
+      font-family: var(--font-main); font-size: 28px; font-weight: 700;
+      letter-spacing: 6px; text-transform: uppercase;
+      color: rgba(255,255,255,.88); line-height: 1;
+      margin-bottom: 10px;
+    }
+    .brand-sub {
+      font-family: var(--font-main); font-size: 9px; font-weight: 300;
+      letter-spacing: 5px; text-transform: uppercase;
+      color: rgba(255,255,255,.28);
+    }
+    .brand-rule {
+      width: 32px; height: 1px;
+      background: rgba(255,255,255,.15);
+      margin: 24px auto;
+    }
+    .brand-tagline {
+      font-family: var(--font-main); font-size: 11px; font-weight: 300;
+      color: rgba(255,255,255,.28); letter-spacing: 1.5px;
+      line-height: 1.7;
+    }
+    /* Est. corner */
+    .brand-est {
+      position: absolute; top: 28px; left: 36px;
+      font-family: var(--font-main); font-size: 8px; font-weight: 300;
+      letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.14);
+    }
+
+    /* ── DETAIL PANEL (left page overlay) ──────────── */
+    .detail-panel {
+      position: absolute; inset: 0; z-index: 5;
+      background: var(--cream);
+      overflow-y: auto; overflow-x: hidden;
+      transform: translateX(100%);
+    }
+    .book.detail-open .detail-panel { transform: translateX(0); }
+
+    .detail-back {
+      display: flex; align-items: center; gap: 8px;
+      padding: 14px 28px;
+      font-family: var(--font-main); font-size: 9.5px;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: var(--muted); cursor: pointer; background: var(--cream);
+      position: sticky; top: 0; z-index: 2;
+      border-bottom: 1px solid var(--border);
+      transition: color 0.2s; user-select: none;
+    }
+    .detail-back:hover { color: var(--brown); }
+
+    .detail-hero-img {
+      width: 100%; height: 190px;
+      background-size: cover; background-position: center;
+    }
+    .detail-body { padding: 22px 28px 48px; }
+
+    .detail-badge {
+      display: inline-block; background: var(--brown);
+      color: var(--accent-lt); font-family: var(--font-main);
+      font-size: 8.5px; letter-spacing: 1.5px; padding: 3px 10px;
+      font-weight: 500; margin-bottom: 12px;
+    }
+    .detail-badge.sold { background: rgba(0,0,0,.25); color: rgba(0,0,0,.4); }
+
+    .detail-title {
+      font-family: var(--font-main); font-size: 21px; font-weight: 700;
+      color: var(--brown); line-height: 1.35; margin-bottom: 16px;
+    }
+    .detail-date-price {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 20px; padding-bottom: 18px;
+      border-bottom: 1px solid var(--border);
+    }
+    .detail-date { font-family: var(--font-main); font-size: 11px; color: var(--muted); }
+    .detail-price { font-family: var(--font-main); font-size: 17px; font-weight: 700; color: var(--brown); }
+    .detail-desc {
+      font-family: var(--font-main); font-size: 12px; font-weight: 300;
+      color: var(--brown-mid); line-height: 1.9; margin-bottom: 22px;
+    }
+    .detail-includes-title {
+      font-family: var(--font-main); font-size: 8.5px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; color: var(--muted);
+      margin-bottom: 10px;
+    }
+    .detail-includes { list-style: none; margin-bottom: 18px; }
+    .detail-includes li {
+      font-family: var(--font-main); font-size: 11.5px; font-weight: 300;
+      color: var(--brown-mid); padding: 5px 0;
+      display: flex; align-items: center; gap: 10px;
+      border-bottom: 1px solid rgba(0,0,0,.05);
+    }
+    .detail-includes li::before { content: '—'; color: var(--accent-lt); flex-shrink: 0; }
+    .detail-level-tag {
+      display: inline-block;
+      font-family: var(--font-main); font-size: 8.5px; font-weight: 500;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--muted); padding: 4px 10px;
+      border: 1px solid var(--border);
+    }
+
+    /* ── BOOKING PANEL (right page overlay) ─────────── */
+    .booking-panel {
+      position: absolute; inset: 0; z-index: 5;
+      background: #111;
+      overflow-y: auto; overflow-x: hidden;
+      transform: translateX(100%);
+      display: flex; flex-direction: column;
+    }
+    .book.detail-open .booking-panel { transform: translateX(0); }
+
+    .booking-header {
+      padding: 20px 28px 16px;
+      border-bottom: 1px solid rgba(255,255,255,.07);
+      position: sticky; top: 0; z-index: 2;
+      background: #111; flex-shrink: 0;
+    }
+    .booking-step-label {
+      font-family: var(--font-main); font-size: 8px; font-weight: 700;
+      letter-spacing: 4px; text-transform: uppercase;
+      color: rgba(255,255,255,.22); margin-bottom: 7px;
+    }
+    .booking-program-title {
+      font-family: var(--font-main); font-size: 14px; font-weight: 700;
+      color: rgba(255,255,255,.8); line-height: 1.4;
+    }
+
+    .booking-body { padding: 0 28px 120px; flex: 1; }
+
+    .booking-section {
+      padding: 20px 0;
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .booking-section-title {
+      font-family: var(--font-main); font-size: 8.5px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(255,255,255,.3); margin-bottom: 14px;
+    }
+
+    /* Mini calendar */
+    .cal-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    .cal-month {
+      font-family: var(--font-main); font-size: 12px; font-weight: 500;
+      letter-spacing: 0.5px; color: rgba(255,255,255,.65);
+    }
+    .cal-nav-btn {
+      background: none; border: none; cursor: pointer;
+      color: rgba(255,255,255,.35); font-size: 16px; line-height: 1;
+      padding: 2px 6px; transition: color 0.2s;
+    }
+    .cal-nav-btn:hover { color: rgba(255,255,255,.75); }
+    .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+    .cal-day-label {
+      text-align: center; font-family: var(--font-main); font-size: 8px;
+      font-weight: 600; letter-spacing: 0.5px; color: rgba(255,255,255,.22);
+      padding: 4px 0 7px;
+    }
+    .cal-cell {
+      aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+      font-family: var(--font-main); font-size: 10.5px; font-weight: 300;
+      color: rgba(255,255,255,.18); border-radius: 50%; cursor: default;
+      transition: all 0.15s;
+    }
+    .cal-cell.available {
+      color: rgba(255,255,255,.72); cursor: pointer;
+      border: 1px solid rgba(255,255,255,.14);
+    }
+    .cal-cell.available:hover { background: rgba(255,255,255,.1); }
+    .cal-cell.selected {
+      background: rgba(255,255,255,.9); color: #111;
+      font-weight: 700; border-color: transparent;
+    }
+
+    /* Time slots */
+    .time-slots { display: flex; gap: 8px; flex-wrap: wrap; }
+    .time-slot {
+      padding: 7px 20px;
+      font-family: var(--font-main); font-size: 11px; font-weight: 400;
+      color: rgba(255,255,255,.45);
+      border: 1px solid rgba(255,255,255,.12);
+      background: none; cursor: pointer; transition: all 0.15s;
+    }
+    .time-slot:hover { border-color: rgba(255,255,255,.35); color: rgba(255,255,255,.8); }
+    .time-slot.selected { background: rgba(255,255,255,.9); color: #111; border-color: transparent; font-weight: 700; }
+
+    /* Qty stepper */
+    .qty-stepper { display: flex; align-items: center; gap: 14px; }
+    .qty-btn {
+      width: 30px; height: 30px; border: 1px solid rgba(255,255,255,.14);
+      background: none; color: rgba(255,255,255,.55); cursor: pointer;
+      font-size: 18px; display: flex; align-items: center; justify-content: center;
+      transition: all 0.15s; line-height: 1;
+    }
+    .qty-btn:hover { border-color: rgba(255,255,255,.4); color: rgba(255,255,255,.9); }
+    .qty-val {
+      font-family: var(--font-main); font-size: 17px; font-weight: 500;
+      color: rgba(255,255,255,.82); min-width: 22px; text-align: center;
+    }
+    .qty-note { font-family: var(--font-main); font-size: 9.5px; color: rgba(255,255,255,.25); margin-left: 4px; }
+
+    /* Text inputs */
+    .booking-input {
+      width: 100%; background: rgba(255,255,255,.04);
+      border: none; border-bottom: 1px solid rgba(255,255,255,.1);
+      padding: 10px 2px; margin-bottom: 12px;
+      font-family: var(--font-main); font-size: 12px; font-weight: 300;
+      color: rgba(255,255,255,.8); outline: none; transition: border-color 0.2s;
+    }
+    .booking-input::placeholder { color: rgba(255,255,255,.2); }
+    .booking-input:focus { border-color: rgba(255,255,255,.4); }
+
+    /* Sticky footer */
+    .booking-footer {
+      position: sticky; bottom: 0;
+      background: #111; border-top: 1px solid rgba(255,255,255,.08);
+      padding: 16px 28px;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-shrink: 0;
+    }
+    .booking-total-label {
+      font-family: var(--font-main); font-size: 8.5px; font-weight: 700;
+      letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,.28);
+      margin-bottom: 4px;
+    }
+    .booking-total-price {
+      font-family: var(--font-main); font-size: 19px; font-weight: 700;
+      color: rgba(255,255,255,.88);
+    }
+    .booking-submit {
+      padding: 12px 28px;
+      background: rgba(255,255,255,.88); border: none; cursor: pointer;
+      font-family: var(--font-main); font-size: 10.5px; font-weight: 700;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: #111; transition: background 0.2s;
+    }
+    .booking-submit:hover { background: #fff; }
+
+    /* ── PAGE TRANSITION OVERLAY ────────────────────── */
+    #bookOverlay {
+      position: fixed; inset: 0; z-index: 200;
+      background: #0c0c0c;
+      opacity: 0; pointer-events: none;
+    }
+
+    /* ── MOBILE ───────────────────────────────────── */
+    @media (max-width: 768px) {
+      html, body { overflow: auto; }
+      .book {
+        grid-template-columns: 1fr !important;
+        grid-template-rows: 48px auto auto;
+        grid-template-areas: "spine" "left" "right";
+        height: auto; min-height: 100vh; transition: none;
+      }
+      .spine { flex-direction: row; padding: 0 20px; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,.45); }
+      .spine::before { background-image: none; }
+      .spine-brand, .spine.spine-open .spine-brand { writing-mode: horizontal-tb; opacity: 1; font-size: 11px; pointer-events: auto; }
+      .spine-nav, .spine.spine-open .spine-nav { flex-direction: row; gap: 16px; padding: 0; align-items: center; width: auto; }
+      .spine-nav a, .spine.spine-open .spine-nav a { writing-mode: horizontal-tb; font-size: 11px; letter-spacing: 1.5px; width: auto; padding: 0; }
+      .spine-nav a:hover, .spine.spine-open .spine-nav a:hover { background: none; }
+      .spine-deco, .spine.spine-open .spine-deco { display: none; }
+      .page-left { box-shadow: none; }
+      .about-body { padding-bottom: 40px; }
+      .idiots-section, .shop-section { padding-left: 24px; padding-right: 24px; }
+      .section-divider { margin-left: 24px; margin-right: 24px; }
+      .page-header { padding: 16px 24px 14px; }
+      .member-layout { grid-template-columns: 1fr; }
+      .team-photo { height: 200px; }
+      .page-right { min-height: 300px; }
+      .brand-name { font-size: 22px; letter-spacing: 5px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="bookOverlay"></div>
+
+<div class="book" id="book">
+
+  <!-- ═══ LEFT PAGE ════════════════════════════════════════════════ -->
+  <div class="page-left">
+
+    <header class="page-header">
+      <a href="index.html">
+        <img class="logo-img" src="LOGO.png" alt="THREE Idiots Paper Service"
+             style="height:88px;width:auto;display:block;mix-blend-mode:multiply;">
+      </a>
+    </header>
+
+    <!-- ── Hero Slider ── -->
+    <div class="hero" id="hero">
+      <div class="slide active">
+        <div class="slide-bg" style="background-image:url('first%20program%20banner.png');"></div>
+        <div class="slide-grain"></div><div class="slide-rule"></div>
+        <div class="slide-overlay">
+          <div class="slide-tag">Exhibition · 2026</div>
+          <div class="slide-title">활판의 미학,<br>손으로 찍는 기억</div>
+          <div class="slide-desc">전통 활판 인쇄 기법으로 만드는 나만의 인쇄물</div>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-bg" style="background-image:url('second%20program%20banner.png');"></div>
+        <div class="slide-grain"></div><div class="slide-rule"></div>
+        <div class="slide-overlay">
+          <div class="slide-tag">Workshop · 2026</div>
+          <div class="slide-title">리소그래프<br>인쇄 워크숍</div>
+          <div class="slide-desc">두 가지 색상으로 표현하는 개성 있는 인쇄 예술</div>
+        </div>
+      </div>
+      <div class="slide">
+        <div class="slide-bg" style="background-image:url('third%20program%20banner.png');"></div>
+        <div class="slide-grain"></div><div class="slide-rule"></div>
+        <div class="slide-overlay">
+          <div class="slide-tag">Masterclass · 2026</div>
+          <div class="slide-title">Book Binding<br>제본 마스터클래스</div>
+          <div class="slide-desc">손으로 엮는 나만의 책, 일본식 실 제본 심화 과정</div>
+        </div>
+      </div>
+      <div class="slider-dots">
+        <div class="dot active" data-i="0"></div>
+        <div class="dot" data-i="1"></div>
+        <div class="dot" data-i="2"></div>
+      </div>
+      <div class="slide-counter" id="slideCounter">01 / 03</div>
+    </div>
+
+    <!-- ── Programs ── -->
+    <section class="programs">
+      <div class="sec-header">
+        <h2 class="sec-title">진행중인 프로그램</h2>
+        <div class="sec-rule"></div>
+        <span class="sec-date">2026. 11</span>
+      </div>
+      <div class="cards">
+        <article class="card">
+          <div class="card-img">
+            <div class="card-img-bg" style="background-image:url('first%20program%20card%20news.png');"></div>
+            <span class="card-badge">OPEN</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">활판 명함<br>제작 워크숍</div>
+            <div class="card-foot">
+              <span class="card-date">11.15 — 11.16</span>
+              <span class="card-price">₩85,000</span>
+            </div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-img">
+            <div class="card-img-bg" style="background-image:url('second%20program%20card%20news.png');"></div>
+            <span class="card-badge sold">마감임박</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">리소 입문<br>포스터 프린팅</div>
+            <div class="card-foot">
+              <span class="card-date">11.22 — 11.23</span>
+              <span class="card-price">₩120,000</span>
+            </div>
+          </div>
+        </article>
+        <article class="card">
+          <div class="card-img">
+            <div class="card-img-bg" style="background-image:url('third%20program%20card%20news.png');"></div>
+            <span class="card-badge">모집중</span>
+          </div>
+          <div class="card-body">
+            <div class="card-title">Book Binding<br>제본 마스터클래스</div>
+            <div class="card-foot">
+              <span class="card-date">12.06 — 12.07</span>
+              <span class="card-price">₩150,000</span>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <!-- ── Detail Panel ── -->
+    <div class="detail-panel" id="detailPanel">
+      <div class="detail-back" id="detailBack">
+        <span style="font-size:15px;line-height:1;">←</span>
+        <span>돌아가기</span>
+      </div>
+      <div class="detail-hero-img" id="detailImg"></div>
+      <div class="detail-body">
+        <div class="detail-badge" id="detailBadge"></div>
+        <h2 class="detail-title" id="detailTitle"></h2>
+        <div class="detail-date-price">
+          <span class="detail-date" id="detailDate"></span>
+          <span class="detail-price" id="detailPrice"></span>
+        </div>
+        <p class="detail-desc" id="detailDesc"></p>
+        <div class="detail-includes-title">포함 내역</div>
+        <ul class="detail-includes" id="detailIncludes"></ul>
+        <div class="detail-level-tag" id="detailLevel"></div>
+      </div>
+    </div>
+
+  </div><!-- /page-left -->
+
+
+  <!-- ═══ SPINE ══════════════════════════════════════════════════ -->
+  <nav class="spine" id="spine">
+    <div class="spine-brand">Three Idiots Paper Service</div>
+    <img class="spine-logo logo-img" src="LOGO.png" alt="THREE Idiots Printing Room">
+    <div class="spine-nav">
+      <a href="about.html">About</a>
+      <a href="order.html">Order</a>
+      <a href="index.html" class="active">Program</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="spine-deco">✦</div>
+  </nav>
+
+
+  <!-- ═══ RIGHT PAGE — Branding ════════════════════════════════ -->
+  <div class="page-right">
+    <div class="brand-panel">
+      <div class="brand-est">Est. 2026</div>
+      <div class="brand-content">
+        <div class="brand-eyebrow">Seoul · Korea</div>
+        <div class="brand-name">Three<br>Idiots</div>
+        <div class="brand-sub">Paper Service</div>
+        <div class="brand-rule"></div>
+        <div class="brand-tagline">
+          새롭고 기상천외한 것들을<br>만듭니다.
+        </div>
+      </div>
+    </div>
+    <!-- ── Booking Panel ── -->
+    <div class="booking-panel" id="bookingPanel">
+      <div class="booking-header">
+        <div class="booking-step-label">예약 신청</div>
+        <div class="booking-program-title" id="bookingTitle"></div>
+      </div>
+      <div class="booking-body">
+
+        <!-- 날짜 선택 -->
+        <div class="booking-section">
+          <div class="booking-section-title">날짜 선택</div>
+          <div class="cal-nav">
+            <button class="cal-nav-btn" id="calPrev">‹</button>
+            <div class="cal-month" id="calMonth"></div>
+            <button class="cal-nav-btn" id="calNext">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid">
+            <div class="cal-day-label">일</div>
+            <div class="cal-day-label">월</div>
+            <div class="cal-day-label">화</div>
+            <div class="cal-day-label">수</div>
+            <div class="cal-day-label">목</div>
+            <div class="cal-day-label">금</div>
+            <div class="cal-day-label">토</div>
+          </div>
+        </div>
+
+        <!-- 시간 선택 -->
+        <div class="booking-section">
+          <div class="booking-section-title">시간 선택</div>
+          <div class="time-slots" id="timeSlots"></div>
+        </div>
+
+        <!-- 인원 선택 -->
+        <div class="booking-section">
+          <div class="booking-section-title">인원 선택</div>
+          <div class="qty-stepper">
+            <button class="qty-btn" id="qtyMinus">−</button>
+            <div class="qty-val" id="qtyVal">1</div>
+            <button class="qty-btn" id="qtyPlus">+</button>
+            <span class="qty-note">최대 5명</span>
+          </div>
+        </div>
+
+        <!-- 신청자 정보 -->
+        <div class="booking-section">
+          <div class="booking-section-title">신청자 정보</div>
+          <input class="booking-input" id="bookingName" type="text" placeholder="이름을 입력하세요">
+          <input class="booking-input" id="bookingPhone" type="tel" placeholder="연락처 (010-0000-0000)">
+        </div>
+
+      </div><!-- /booking-body -->
+
+      <div class="booking-footer">
+        <div>
+          <div class="booking-total-label">합계</div>
+          <div class="booking-total-price" id="bookingTotal"></div>
+        </div>
+        <button class="booking-submit" id="bookingSubmit">예약하기</button>
+      </div>
+    </div><!-- /booking-panel -->
+
+  </div><!-- /page-right -->
+
+</div><!-- /book -->
+
+
+<script>
+/* ════════════════════════════════════════════
+   HERO SLIDER
+════════════════════════════════════════════ */
+(function () {
+  const slides  = document.querySelectorAll('.slide');
+  const dots    = document.querySelectorAll('.dot');
+  const counter = document.getElementById('slideCounter');
+  let idx = 0, timer;
+
+  function goTo(i) {
+    slides[idx].classList.remove('active');
+    dots[idx].classList.remove('active');
+    idx = (i + slides.length) % slides.length;
+    slides[idx].classList.add('active');
+    dots[idx].classList.add('active');
+    if (counter) counter.textContent = `0${idx + 1} / 0${slides.length}`;
+  }
+
+  timer = setInterval(() => goTo(idx + 1), 4500);
+  dots.forEach((d, i) => d.addEventListener('click', () => {
+    clearInterval(timer);
+    goTo(i);
+    timer = setInterval(() => goTo(idx + 1), 4500);
+  }));
+})();
+
+/* ════════════════════════════════════════════
+   SPINE HOVER EXPAND
+════════════════════════════════════════════ */
+const spineEl = document.getElementById('spine');
+const bookEl  = document.getElementById('book');
+const isMob   = () => window.innerWidth <= 768;
+
+spineEl.addEventListener('mouseenter', () => {
+  if (isMob()) return;
+  spineEl.classList.add('spine-open');
+  bookEl.classList.add('spine-open');
+});
+spineEl.addEventListener('mouseleave', () => {
+  spineEl.classList.remove('spine-open');
+  bookEl.classList.remove('spine-open');
+});
+
+/* ════════════════════════════════════════════
+   LOGO BACKGROUND REMOVAL (Canvas API)
+════════════════════════════════════════════ */
+(function stripLogoBackground() {
+  const imgs = document.querySelectorAll('.logo-img');
+  if (!imgs.length) return;
+  const src = new Image();
+  src.onload = function () {
+    const c = document.createElement('canvas');
+    c.width = src.naturalWidth; c.height = src.naturalHeight;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(src, 0, 0);
+    try {
+      const d = ctx.getImageData(0, 0, c.width, c.height);
+      for (let i = 0; i < d.data.length; i += 4) {
+        const avg = (d.data[i] + d.data[i+1] + d.data[i+2]) / 3;
+        if (avg > 210) d.data[i+3] = 0;
+        else if (avg > 150) d.data[i+3] = Math.round((210 - avg) / 60 * 255);
+      }
+      ctx.putImageData(d, 0, 0);
+      const url = c.toDataURL('image/png');
+      imgs.forEach(el => { el.src = url; });
+    } catch (e) {
+      imgs.forEach(el => {
+        if (!el.classList.contains('spine-logo')) el.style.mixBlendMode = 'multiply';
+      });
+    }
+  };
+  src.onerror = function () {
+    imgs.forEach(el => {
+      if (!el.classList.contains('spine-logo')) el.style.mixBlendMode = 'multiply';
+    });
+  };
+  src.src = 'LOGO.png';
+})();
+
+
+/* ════════════════════════════════════════════
+   PROGRAM CARDS — DETAIL + BOOKING VIEW
+════════════════════════════════════════════ */
+(function () {
+  const programs = [
+    {
+      title: '활판 명함 제작 워크숍',
+      badge: 'OPEN', sold: false,
+      dates: ['2026-11-15', '2026-11-16'],
+      times: ['10:00', '14:00'],
+      price: 85000,
+      img: 'first program banner.png',
+      desc: '전통 활판 인쇄 기법으로 나만의 명함을 만드는 워크숍입니다. 직접 활자를 조판하고 프레스로 찍어내는 경험을 통해 인쇄의 본질을 느껴보세요. 소규모 정원으로 진행되어 충분한 개인 지도를 받을 수 있습니다.',
+      includes: ['재료비 포함', '명함 30매 제공', '점심 및 음료 제공'],
+      level: '입문'
+    },
+    {
+      title: '리소 입문 포스터 프린팅',
+      badge: '마감임박', sold: true,
+      dates: ['2026-11-22', '2026-11-23'],
+      times: ['10:00', '14:00'],
+      price: 120000,
+      img: 'second program banner.png',
+      desc: '리소그래프의 독특한 질감과 색감을 경험하는 포스터 프린팅 워크숍입니다. 두 가지 색상을 레이어링하여 개성 있는 A3 포스터를 직접 기획하고 제작합니다.',
+      includes: ['재료비 포함', 'A3 포스터 3매 제공', '음료 제공'],
+      level: '입문'
+    },
+    {
+      title: 'Book Binding 제본 마스터클래스',
+      badge: '모집중', sold: false,
+      dates: ['2026-12-06', '2026-12-07'],
+      times: ['10:00', '14:00'],
+      price: 150000,
+      img: 'third program banner.png',
+      desc: '일본식 실 제본(Coptic Stitch)을 중심으로 다양한 제본 기술을 배우는 심화 과정입니다. 나만의 노트북 또는 스케치북을 완성해가는 두 번의 집중 수업입니다.',
+      includes: ['재료비 포함', '완성 제본 책 1권', '커피 및 음료 제공'],
+      level: '심화'
+    }
+  ];
+
+  let cur = null, selDate = null, selTime = null, qty = 1;
+  let calY = 2026, calM = 10;
+
+  const bookEl  = document.getElementById('book');
+  const overlay = document.getElementById('bookOverlay');
+
+  /* refs — detail */
+  const detailBack     = document.getElementById('detailBack');
+  const detailImg      = document.getElementById('detailImg');
+  const detailBadge    = document.getElementById('detailBadge');
+  const detailTitle    = document.getElementById('detailTitle');
+  const detailDate     = document.getElementById('detailDate');
+  const detailPrice    = document.getElementById('detailPrice');
+  const detailDesc     = document.getElementById('detailDesc');
+  const detailIncludes = document.getElementById('detailIncludes');
+  const detailLevel    = document.getElementById('detailLevel');
+
+  /* refs — booking */
+  const bookingTitleEl = document.getElementById('bookingTitle');
+  const calMonthEl     = document.getElementById('calMonth');
+  const calGrid        = document.getElementById('calGrid');
+  const timeSlotsEl    = document.getElementById('timeSlots');
+  const qtyValEl       = document.getElementById('qtyVal');
+  const bookingTotal   = document.getElementById('bookingTotal');
+  const bookingName    = document.getElementById('bookingName');
+  const bookingPhone   = document.getElementById('bookingPhone');
+
+  const fmt = n => '₩' + n.toLocaleString('ko-KR');
+
+  function updateTotal() {
+    if (cur) bookingTotal.textContent = fmt(cur.price * qty);
+  }
+
+  function renderCal() {
+    const months = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+    calMonthEl.textContent = `${calY}년 ${months[calM]}`;
+    /* remove old date cells, keep 7 day labels */
+    while (calGrid.children.length > 7) calGrid.removeChild(calGrid.lastChild);
+    const firstDow = new Date(calY, calM, 1).getDay();
+    const days = new Date(calY, calM + 1, 0).getDate();
+    for (let i = 0; i < firstDow; i++) {
+      const el = document.createElement('div'); el.className = 'cal-cell'; calGrid.appendChild(el);
+    }
+    for (let d = 1; d <= days; d++) {
+      const ds = `${calY}-${String(calM+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+      const avail = cur && cur.dates.includes(ds);
+      const sel   = ds === selDate;
+      const el = document.createElement('div');
+      el.className = 'cal-cell' + (avail ? ' available' : '') + (sel ? ' selected' : '');
+      el.textContent = d;
+      if (avail) el.addEventListener('click', () => { selDate = ds; renderCal(); });
+      calGrid.appendChild(el);
+    }
+  }
+
+  function renderTimes() {
+    timeSlotsEl.innerHTML = '';
+    if (!cur) return;
+    cur.times.forEach(t => {
+      const btn = document.createElement('button');
+      btn.className = 'time-slot' + (t === selTime ? ' selected' : '');
+      btn.textContent = t;
+      btn.addEventListener('click', () => { selTime = t; renderTimes(); });
+      timeSlotsEl.appendChild(btn);
+    });
+  }
+
+  function populateContent(idx) {
+    cur = programs[idx]; selDate = null; selTime = null; qty = 1;
+    const fd = new Date(cur.dates[0]);
+    calY = fd.getFullYear(); calM = fd.getMonth();
+
+    /* detail */
+    detailImg.style.backgroundImage = `url('${cur.img}')`;
+    detailBadge.textContent = cur.badge;
+    detailBadge.className = 'detail-badge' + (cur.sold ? ' sold' : '');
+    detailTitle.textContent = cur.title;
+    const [d0, d1] = cur.dates;
+    detailDate.textContent = `${d0.slice(5).replace('-','.')} — ${d1.slice(5).replace('-','.')}`;
+    detailPrice.textContent = fmt(cur.price);
+    detailDesc.textContent = cur.desc;
+    detailIncludes.innerHTML = cur.includes.map(s => `<li>${s}</li>`).join('');
+    detailLevel.textContent = `Level · ${cur.level}`;
+
+    /* booking */
+    bookingTitleEl.textContent = cur.title;
+    qtyValEl.textContent = '1';
+    bookingName.value = ''; bookingPhone.value = '';
+    renderCal(); renderTimes(); updateTotal();
+
+    document.getElementById('detailPanel').scrollTop = 0;
+    document.getElementById('bookingPanel').scrollTop = 0;
+  }
+
+  function runTransition(onMid) {
+    /* Fade in */
+    overlay.style.transition = 'opacity 0.2s ease-in';
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'all';
+
+    setTimeout(() => {
+      onMid();                                   /* swap content at peak dark */
+      overlay.style.transition = 'opacity 0.28s ease-out';
+      void overlay.offsetWidth;
+      overlay.style.opacity = '0';
+      overlay.style.pointerEvents = 'none';
+    }, 210);
+  }
+
+  function open(idx) {
+    runTransition(() => {
+      populateContent(idx);
+      bookEl.classList.add('detail-open');
+    });
+  }
+
+  function close() {
+    runTransition(() => {
+      bookEl.classList.remove('detail-open');
+      cur = null;
+    });
+  }
+
+  /* card clicks */
+  document.querySelectorAll('.card').forEach((c, i) => c.addEventListener('click', () => open(i)));
+
+  /* back */
+  detailBack.addEventListener('click', close);
+
+  /* qty */
+  document.getElementById('qtyMinus').addEventListener('click', () => { if (qty > 1) { qty--; qtyValEl.textContent = qty; updateTotal(); } });
+  document.getElementById('qtyPlus').addEventListener('click',  () => { if (qty < 5) { qty++; qtyValEl.textContent = qty; updateTotal(); } });
+
+  /* cal nav */
+  document.getElementById('calPrev').addEventListener('click', () => { calM--; if (calM < 0) { calM = 11; calY--; } renderCal(); });
+  document.getElementById('calNext').addEventListener('click', () => { calM++; if (calM > 11) { calM = 0; calY++; } renderCal(); });
+
+  /* phone format */
+  bookingPhone.addEventListener('input', () => {
+    let v = bookingPhone.value.replace(/\D/g, '').slice(0, 11);
+    if (v.length > 7) v = v.slice(0,3) + '-' + v.slice(3,7) + '-' + v.slice(7);
+    else if (v.length > 3) v = v.slice(0,3) + '-' + v.slice(3);
+    bookingPhone.value = v;
+  });
+
+  /* submit */
+  document.getElementById('bookingSubmit').addEventListener('click', () => {
+    if (!selDate)  { alert('날짜를 선택해주세요.'); return; }
+    if (!selTime)  { alert('시간을 선택해주세요.'); return; }
+    if (!bookingName.value.trim())  { alert('이름을 입력해주세요.'); return; }
+    if (!bookingPhone.value.trim()) { alert('연락처를 입력해주세요.'); return; }
+    alert(`예약이 완료되었습니다!\n\n프로그램: ${cur.title}\n일정: ${selDate} ${selTime}\n인원: ${qty}명\n합계: ${fmt(cur.price * qty)}`);
+  });
+})();
+
+</script>
+</body>
+</html>
