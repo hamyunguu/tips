@@ -392,7 +392,7 @@
       perspective: 1000px; perspective-origin: 50% 45%;
       display: flex; align-items: center; justify-content: center;
       position: relative; cursor: grab; user-select: none; overflow: visible;
-      margin-bottom: 24px;
+      margin-bottom: 0;
     }
     .bdo-book-scene.dragging { cursor: grabbing; }
     .bdo-book-shadow {
@@ -419,7 +419,7 @@
     .bdo-hint {
       font-family: var(--font-main); font-size: 8px; font-weight: 300;
       letter-spacing: 2.5px; text-transform: uppercase;
-      color: rgba(255,255,255,.16); margin-top: 4px; margin-bottom: 20px;
+      color: rgba(255,255,255,.16); margin-top: 30px; margin-bottom: 20px;
     }
 
     /* Specs section */
@@ -1485,7 +1485,7 @@ spineEl.addEventListener('mouseleave', () => {
     bdoBook3d.style.width  = BDO_W + 'px';
     bdoBook3d.style.height = BDO_H + 'px';
     bdoScene.style.width       = (BDO_W + BDO_D + 90) + 'px';
-    bdoScene.style.height      = (BDO_H + BDO_D + 70) + 'px';
+    bdoScene.style.height      = (BDO_H + BDO_D + 20) + 'px';
     bdoScene.style.perspective = Math.max(700, BDO_H * 2.8) + 'px';
 
     bdoSetFace(bdoFront,  BDO_W, BDO_H, `translateZ(${BDO_D/2}px)`);
