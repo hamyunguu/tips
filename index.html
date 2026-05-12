@@ -309,16 +309,16 @@
     }
 
     .books-grid {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
-      align-items: start;
+      columns: 5;
+      column-gap: 5px;
     }
 
     .book-item {
       cursor: pointer;
       position: relative;
       overflow: hidden;
+      break-inside: avoid;
+      margin-bottom: 5px;
     }
     /* hover: 약간 어둡게만 */
     .book-item::after {
