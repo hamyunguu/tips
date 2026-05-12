@@ -1754,7 +1754,7 @@ spineEl.addEventListener('mouseleave', () => {
         setTimeout(function(){
           overlay.classList.add('gone');
           setTimeout(function(){ overlay.style.display = 'none'; }, 600);
-        }, OPEN_MS * 0.7);
+        }, OPEN_MS + 500); /* wait full open + 0.5s hold */
       }, 580);
     }
   }
