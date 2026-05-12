@@ -589,6 +589,36 @@
       .team-photo { height: 200px; }
       .page-right { min-height: 300px; }
       .brand-name { font-size: 22px; letter-spacing: 5px; }
+
+      /* ── 모바일 detail/booking 2단계 분리 ── */
+      /* 두 패널 모두 fixed 풀스크린으로 */
+      .detail-panel, .booking-panel {
+        position: fixed; inset: 0; z-index: 50;
+      }
+      /* booking-panel: detail-open 시에도 숨김 */
+      .book.detail-open .booking-panel { transform: translateX(100%); }
+      /* booking-open 시 booking 보이고, detail 뒤로 */
+      .book.booking-open .booking-panel { transform: translateX(0); }
+      .book.booking-open .detail-panel  { transform: translateX(-100%); }
+
+      /* 예약하기 버튼 (모바일 전용) */
+      .detail-reserve-btn {
+        display: block;
+        width: calc(100% - 56px); margin: 24px 28px 40px;
+        padding: 15px; background: var(--brown); border: none; cursor: pointer;
+        font-family: var(--font-main); font-size: 11px; font-weight: 700;
+        letter-spacing: 3px; text-transform: uppercase; color: var(--accent-lt);
+      }
+      /* 예약 패널 내 뒤로가기 (모바일 전용) */
+      .booking-back-detail {
+        display: flex; align-items: center; gap: 8px;
+        padding: 14px 28px; cursor: pointer;
+        font-family: var(--font-main); font-size: 9.5px; letter-spacing: 2.5px;
+        text-transform: uppercase; color: rgba(255,255,255,.35);
+        border-bottom: 1px solid rgba(255,255,255,.07);
+        transition: color .2s;
+      }
+      .booking-back-detail:hover { color: rgba(255,255,255,.7); }
     }
   </style>
 </head>
@@ -714,6 +744,8 @@
         <ul class="detail-includes" id="detailIncludes"></ul>
         <div class="detail-level-tag" id="detailLevel"></div>
       </div>
+      <!-- 모바일 전용 예약하기 버튼 -->
+      <button class="detail-reserve-btn" id="detailReserveBtn" style="display:none;">예약하기</button>
     </div>
 
   </div><!-- /page-left -->
@@ -749,6 +781,11 @@
     </div>
     <!-- ── Booking Panel ── -->
     <div class="booking-panel" id="bookingPanel">
+      <!-- 모바일 전용: 상세로 돌아가기 -->
+      <div class="booking-back-detail" id="bookingBackDetail" style="display:none;">
+        <span style="font-size:15px;line-height:1;">←</span>
+        <span>프로그램 상세</span>
+      </div>
       <div class="booking-header">
         <div class="booking-step-label">예약 신청</div>
         <div class="booking-program-title" id="bookingTitle"></div>
@@ -1044,19 +1081,37 @@ spineEl.addEventListener('mouseleave', () => {
     }, 210);
   }
 
+  const isMobile = () => window.innerWidth <= 768;
+
   function open(idx) {
     runTransition(() => {
       populateContent(idx);
+      bookEl.classList.remove('booking-open');
       bookEl.classList.add('detail-open');
+      /* 모바일: 예약하기 버튼 + 예약 뒤로가기 버튼 표시 */
+      document.getElementById('detailReserveBtn').style.display = isMobile() ? 'block' : 'none';
+      document.getElementById('bookingBackDetail').style.display = isMobile() ? 'flex' : 'none';
     });
   }
 
   function close() {
     runTransition(() => {
       bookEl.classList.remove('detail-open');
+      bookEl.classList.remove('booking-open');
       cur = null;
     });
   }
+
+  /* 모바일 예약하기 버튼 → 예약 화면 */
+  document.getElementById('detailReserveBtn').addEventListener('click', () => {
+    document.getElementById('bookingPanel').scrollTop = 0;
+    bookEl.classList.add('booking-open');
+  });
+
+  /* 모바일 예약 화면 → 상세로 뒤로 */
+  document.getElementById('bookingBackDetail').addEventListener('click', () => {
+    bookEl.classList.remove('booking-open');
+  });
 
   /* card clicks */
   document.querySelectorAll('.card').forEach((c, i) => c.addEventListener('click', () => open(i)));

@@ -548,16 +548,17 @@
     @media (max-width: 768px) {
       html, body { overflow: auto; }
       .book { grid-template-columns: 1fr !important; grid-template-rows: 48px auto auto; grid-template-areas: "spine" "left" "right"; height: auto; min-height: 100vh; transition: none; }
-      .spine { flex-direction: row; padding: 0 20px; justify-content: space-between; box-shadow: 0 4px 20px rgba(0,0,0,.45); }
+      .spine { flex-direction: row; padding: 0 16px; justify-content: flex-end; box-shadow: 0 4px 20px rgba(0,0,0,.45); }
       .spine::before { background-image: none; }
-      .spine-brand, .spine.spine-open .spine-brand { writing-mode: horizontal-tb; opacity: 1; font-size: 11px; pointer-events: auto; }
-      .spine-nav, .spine.spine-open .spine-nav { flex-direction: row; gap: 16px; padding: 0; align-items: center; width: auto; }
-      .spine-nav a, .spine.spine-open .spine-nav a { writing-mode: horizontal-tb; font-size: 11px; letter-spacing: 1.5px; width: auto; padding: 0; }
+      .spine-brand, .spine.spine-open .spine-brand { display: none !important; }
+      .spine-nav, .spine.spine-open .spine-nav { flex-direction: row; gap: 20px; padding: 0; align-items: center; width: auto; }
+      .spine-nav a, .spine.spine-open .spine-nav a { writing-mode: horizontal-tb; font-size: 10.5px; letter-spacing: 1.5px; width: auto; padding: 0; }
       .spine-nav a:hover, .spine.spine-open .spine-nav a:hover { background: none; }
       .spine-deco, .spine.spine-open .spine-deco { display: none; }
       .page-left { box-shadow: none; }
+      .page-header { padding: 0 20px; height: 48px; }
+      .page-header .logo-img { height: 42px !important; }
       .form-body { padding: 20px 24px 36px; }
-      .page-header { padding: 16px 24px 14px; }
       .opt-cards.cols-5 { grid-template-columns: repeat(3, 1fr); }
       .field-row.cols-2, .field-row.cols-3 { grid-template-columns: 1fr; }
       .upload-grid { grid-template-columns: 1fr 1fr; }
