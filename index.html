@@ -1746,13 +1746,15 @@ spineEl.addEventListener('mouseleave', () => {
       book.style.transform  = `rotateX(-8deg) rotateY(5deg)`;
 
       setTimeout(function(){
-        /* Phase 3: cover swings BACKWARD around spine (left edge) — matches sketch */
+        /* Phase 3: cover swings backward AND whole book rotates to show back cover */
         front.style.transform = `rotateY(-155deg)`;
+        book.style.transition  = 'transform 1.05s cubic-bezier(0.45,0,0.55,1)';
+        book.style.transform   = `rotateX(-8deg) rotateY(175deg)`;
 
         setTimeout(function(){
           overlay.classList.add('gone');
           setTimeout(function(){ overlay.style.display = 'none'; }, 600);
-        }, OPEN_MS * 0.65);
+        }, OPEN_MS * 0.7);
       }, 580);
     }
   }
